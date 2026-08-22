@@ -53,14 +53,23 @@ export function gatewayFunctionUrl(ref: string): string {
 }
 
 async function managementFetch(pat: string, path: string, init?: RequestInit): Promise<Response> {
-  const res = await fetch(`${MANAGEMENT_API}${path}`, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${pat}`,
-      'Content-Type': 'application/json',
-      ...(init?.headers || {}),
-    },
-  })
+  let res: Response
+  try {
+    res = await fetch(`${MANAGEMENT_API}${path}`, {
+      ...init,
+      headers: {
+        Authorization: `Bearer ${pat}`,
+        'Content-Type': 'application/json',
+        ...(init?.headers || {}),
+      },
+    })
+  } catch {
+    // fetch() only rejects here on NETWORK-level failures — HTTP error
+    // statuses still return a Response below via readErrorMessage.
+    throw new Error(
+      `Network error calling ${init?.method ?? 'GET'} ${path} — this usually means a blocked request (ad-blocker/privacy extension), no internet connection, or a CORS preflight rejection. Check your browser's DevTools Network tab for the specific request to api.supabase.com.`
+    )
+  }
   return res
 }
 

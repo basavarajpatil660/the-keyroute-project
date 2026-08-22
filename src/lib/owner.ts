@@ -12,6 +12,16 @@ import { isSupabaseConfigured, supabase } from './supabase'
 
 const OWNER_STORAGE_KEY = 'keyroute:owner'
 
+// Hostname of this install's own Supabase project, used to self-diagnose
+// network errors (the failing request goes to <host>/auth/v1/signup).
+function projectHost(): string {
+  try {
+    return new URL(import.meta.env.VITE_SUPABASE_URL || '').hostname || '<your-project>.supabase.co'
+  } catch {
+    return '<your-project>.supabase.co'
+  }
+}
+
 export interface OwnerCredentials {
   email: string
   password: string
@@ -125,7 +135,22 @@ export async function provisionOwnerAccount(): Promise<{ email: string; mode: 'c
       email: generateOwnerEmail(),
       password: generateOwnerPassword(),
     }
-    const { data, error } = await supabase.auth.signUp(creds)
+
+    // supabase-js reports HTTP-level auth problems via the returned `error`
+    // (handled below); it only THROWS when fetch itself fails at the network
+    // level. Give that case a self-diagnosing message instead of a bare
+    // "Failed to fetch".
+    let data: Awaited<ReturnType<typeof supabase.auth.signUp>>['data']
+    let error: Awaited<ReturnType<typeof supabase.auth.signUp>>['error']
+    try {
+      const res = await supabase.auth.signUp(creds)
+      data = res.data
+      error = res.error
+    } catch {
+      throw new Error(
+        `Network error creating the owner account via Supabase Auth — check connectivity to ${projectHost()} (ad-blockers, offline states, and CORS preflight rejections all look identical here).`
+      )
+    }
 
     if (error) {
       if (looksLikeAlreadyRegistered(error.message) && attempt === 0) continue
