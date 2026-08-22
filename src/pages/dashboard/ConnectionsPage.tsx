@@ -663,18 +663,41 @@ export function ConnectionsPage() {
       </div>
 
       {isError ? (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px', minHeight: 200 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, textAlign: 'center' }}>
-            <p style={{ color: 'var(--color-red)', fontSize: 14 }}>{(error as Error).message}</p>
+        <>
+          {/* Expected on a brand-new project (migrations not applied yet) —
+              shown as a soft note so it never blocks Deploy Gateway, which is
+              what applies those migrations in the first place. */}
+          <div
+            style={{
+              padding: '12px 14px',
+              borderRadius: 'var(--radius-md)',
+              background: 'rgba(248,81,73,0.08)',
+              border: '1px solid rgba(248,81,73,0.25)',
+              color: 'var(--color-text-muted)',
+              fontSize: 13,
+              lineHeight: 1.6,
+              marginBottom: 20,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+              flexWrap: 'wrap',
+            }}
+          >
+            <span>Couldn't read connection state{(error as Error)?.message ? `: ${(error as Error).message}` : ''}.</span>
             <button
               onClick={() => queryClient.invalidateQueries({ queryKey: ['connection'] })}
-              className="btn-primary"
-              style={{ fontSize: 13, padding: '10px 20px' }}
+              className="btn-ghost"
+              style={{ fontSize: 12, padding: '6px 14px', flexShrink: 0 }}
             >
               Retry
             </button>
           </div>
-        </div>
+          {renderConnectForm()}
+          {renderDeployGatewayCard()}
+          {renderComingSoonProviders()}
+          {renderInfoPanel()}
+        </>
       ) : !isLoading && connection ? (
         <>
           {renderConnectionCard()}

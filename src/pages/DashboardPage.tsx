@@ -73,6 +73,18 @@ export function DashboardPage() {
   return (
     <Suspense fallback={<DashboardSectionLoader />}>
       <Routes>
+        {/*
+         * Connections is deliberately NOT wrapped in RequireAuth: its Deploy
+         * Gateway card is what CREATES the silent owner account, so guarding
+         * it behind an existing session deadlocks fresh installs (no session
+         * → bounced to /setup → can never reach the button that makes one).
+         * DashboardLayout handles the no-session state itself.
+         */}
+        <Route element={<DashboardLayout />}>
+          <Route path="connections" element={<ConnectionsPage />} />
+        </Route>
+
+        {/* Every other dashboard section requires an existing owner session. */}
         <Route
           element={
             <RequireAuth>
@@ -83,7 +95,6 @@ export function DashboardPage() {
           <Route index element={<Navigate to="overview" replace />} />
           <Route path="overview" element={<OverviewPage />} />
           <Route path="activity" element={<ActivityPage />} />
-          <Route path="connections" element={<ConnectionsPage />} />
           <Route path="keys" element={<KeysPage />} />
           <Route path="usage" element={<UsagePage />} />
           <Route path="settings" element={<SettingsPage />} />

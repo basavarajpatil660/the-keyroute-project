@@ -160,7 +160,10 @@ export function DashboardLayout() {
     )
   }
 
-  if (!session) return null
+  // No early return when session is null: this layout also renders the
+  // Connections page BEFORE any owner account exists (Deploy Gateway lives
+  // there and is what creates the account). The user section below falls
+  // back to a "not connected" hint in that state.
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: 'var(--color-base)', overflow: 'hidden' }}>
@@ -332,23 +335,24 @@ export function DashboardLayout() {
                 width: 28,
                 height: 28,
                 borderRadius: '50%',
-                background: 'var(--color-indigo)',
+                background: session ? 'var(--color-indigo)' : 'var(--color-surface-2)',
+                border: session ? 'none' : '1px dashed var(--color-border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 11,
                 fontWeight: 700,
-                color: '#ffffff',
+                color: session ? '#ffffff' : 'var(--color-text-faint)',
                 flexShrink: 0,
               }}
             >
-              {session.user.email?.[0]?.toUpperCase() ?? '?'}
+              {session?.user.email?.[0]?.toUpperCase() ?? '?'}
             </div>
             <div style={{ overflow: 'hidden' }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {session.user.email}
+              <p style={{ fontSize: 12, fontWeight: 600, color: session ? 'var(--color-text-primary)' : 'var(--color-text-faint)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {session?.user.email ?? 'No owner account yet'}
               </p>
-              <p style={{ fontSize: 11, color: 'var(--color-text-faint)' }}>Free plan</p>
+              <p style={{ fontSize: 11, color: 'var(--color-text-faint)' }}>{session ? 'Free plan' : 'Run Deploy Gateway to create one'}</p>
             </div>
           </div>
         </div>
