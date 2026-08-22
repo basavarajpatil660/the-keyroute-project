@@ -1,0 +1,363 @@
+/*
+ * Keyroute — Design System
+ * Source of truth: design-system/MASTER.md
+ * Typography: Inter (single family, weights 300–700)
+ * Mono: JetBrains Mono → Fira Code → ui-monospace
+ * Style: Cinema Dark · Amber + Indigo duality
+ * Skill: ui-ux-pro-max · variance 4 · motion 3 · density 5
+ */
+
+/* ─── Google Fonts ────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+/* ─── Design Tokens — Dark (Default) ─────────────────────────────────────── */
+:root {
+  /* Base surfaces */
+  --color-base:         #0a0f1a;
+  --color-base-alt:     #0d1420;
+  --color-surface:      #111827;
+  --color-surface-2:    #1a2235;
+  --color-border:       #1e2d45;
+  --color-border-muted: #162035;
+
+  /* Text */
+  --color-text-primary: #f0f4ff;
+  --color-text-muted:   #7a8ba8;
+  --color-text-faint:   #3d5170;
+
+  /* Amber — primary accent, routing labels, CTAs */
+  --color-amber:          #e8a020;
+  --color-amber-dim:      #b37818;
+  --color-amber-glow:     rgba(232, 160, 32, 0.22);
+  --color-amber-btn-text: #0a0f1a;
+
+  /* Indigo — routing paths, links, info states */
+  --color-indigo:     #7c8ff5;
+  --color-indigo-dim: #5c6fd4;
+  --color-indigo-glow: rgba(124, 143, 245, 0.18);
+
+  /* Semantic */
+  --color-green: #22c55e;
+  --color-red:   #f87171;
+
+  /* Typography */
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+
+  /* Spacing scale (density 5/10) */
+  --space-xs:   4px;
+  --space-sm:   8px;
+  --space-md:   16px;
+  --space-lg:   24px;
+  --space-xl:   32px;
+  --space-2xl:  48px;
+  --space-3xl:  64px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  /* Shadows — dark theme */
+  --shadow-sm:         0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+  --shadow-card:       0 4px 12px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06);
+  --shadow-card-hover: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08);
+  --shadow-lg:         0 16px 40px rgba(0,0,0,0.6);
+  --shadow-glow-amber: 0 4px 20px var(--color-amber-glow);
+  --shadow-glow-indigo: 0 4px 20px var(--color-indigo-glow);
+}
+
+/* ─── Light Theme Overrides ──────────────────────────────────────────────── */
+html[data-theme='light'] {
+  --color-base:         #f4f6fb;
+  --color-base-alt:     #eaeff8;
+  --color-surface:      #ffffff;
+  --color-surface-2:    #f8faff;
+  --color-border:       #d0d9ee;
+  --color-border-muted: #e2e8f7;
+
+  --color-text-primary: #0d1629;
+  --color-text-muted:   #4a5d7a;
+  --color-text-faint:   #8ea0bc;
+
+  --color-amber:          #c07010;
+  --color-amber-dim:      #9a5a08;
+  --color-amber-glow:     rgba(192, 112, 16, 0.2);
+  --color-amber-btn-text: #ffffff;
+
+  --color-indigo:     #4c5fd6;
+  --color-indigo-dim: #3a4bbf;
+  --color-indigo-glow: rgba(76, 95, 214, 0.15);
+
+  --color-green: #16a34a;
+  --color-red:   #dc2626;
+
+  --shadow-sm:         0 1px 3px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
+  --shadow-card:       0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.05);
+  --shadow-card-hover: 0 6px 20px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.06);
+  --shadow-lg:         0 16px 40px rgba(0,0,0,0.12);
+}
+
+/* ─── Base Reset & Typography ─────────────────────────────────────────────
+ * Wrapped in @layer base so it joins Tailwind's own cascade layer ordering.
+ * Without this, these rules sit "unlayered" and beat EVERY Tailwind utility
+ * class (mb-*, text-white, leading-*, tracking-*, etc.) regardless of
+ * specificity — that's what caused the invisible-heading and squished-
+ * spacing bugs on the auth pages (and silently, on every other page too).
+ * ────────────────────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-base);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-amber);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--color-text-primary);
+  }
+
+  h1 { letter-spacing: -0.03em; }
+  h2 { letter-spacing: -0.02em; }
+  h3 { letter-spacing: -0.015em; font-weight: 600; }
+
+  code, pre, kbd, samp {
+    font-family: var(--font-mono);
+  }
+
+  a {
+    color: var(--color-indigo);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  a:hover { color: var(--color-text-primary); }
+}
+
+/* ─── Reduced Motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* ─── Layout ─────────────────────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+@media (max-width: 640px) {
+  .container { padding: 0 var(--space-md); }
+}
+
+/* ─── Section Backgrounds ────────────────────────────────────────────────── */
+.section-alt {
+  background-color: var(--color-base-alt);
+}
+
+/* ─── Surface Card ───────────────────────────────────────────────────────── */
+.surface-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.surface-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-indigo-dim);
+  transform: translateY(-2px);
+}
+
+/* ─── Scroll Reveal — one restrained motion moment per section ──────────────
+ * Used by <Reveal> wrapper (BentoGrid.tsx and similar). Fades + lifts an
+ * element in once, the first time it enters the viewport. Deliberately
+ * subtle: short distance, single easing, no bounce, no repeat.
+ * Reduced-motion users get the global rule above (animation-duration ~0),
+ * which snaps straight to the final state instead of animating.
+ * ────────────────────────────────────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.reveal.is-visible {
+  animation: revealUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Accent Text (indigo) ────────────────────────────────────────────────── */
+.gradient-text {
+  color: var(--color-indigo);
+  -webkit-text-fill-color: var(--color-indigo);
+}
+
+/* ─── Primary Button ─────────────────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 12px 24px;
+  background: var(--color-amber);
+  color: var(--color-amber-btn-text);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background: var(--color-amber-dim);
+  color: var(--color-amber-btn-text);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active { transform: translateY(0); }
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 3px;
+}
+
+/* ─── Ghost Button ───────────────────────────────────────────────────────── */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 11px 23px;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+}
+
+.btn-ghost:hover {
+  border-color: var(--color-text-muted);
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+}
+
+.btn-ghost:focus-visible {
+  outline: 2px solid var(--color-indigo);
+  outline-offset: 3px;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-base); }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-faint); }
+
+/* ─── Code Syntax Tokens ─────────────────────────────────────────────────── */
+.token-keyword  { color: #ff8b87; }
+.token-string   { color: #9dc8f0; }
+.token-comment  { color: var(--color-text-faint); font-style: italic; }
+.token-variable { color: #f0b070; }
+.token-number   { color: #88c0ff; }
+.token-function { color: #c4a0f5; }
+.token-url      { color: var(--color-indigo); }
+
+html[data-theme='light'] .token-keyword  { color: #c23a3a; }
+html[data-theme='light'] .token-string   { color: #1a5ea8; }
+html[data-theme='light'] .token-variable { color: #b05f00; }
+html[data-theme='light'] .token-number   { color: #1a4fa0; }
+html[data-theme='light'] .token-function { color: #6940b5; }
+
+/* ─── Spinner ────────────────────────────────────────────────────────────── */
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-amber);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}
+
+/* ─── Skeleton Loading ───────────────────────────────────────────────────────
+ * Shimmering placeholder bar used in KeysPage / UsagePage / OverviewPage
+ * loading states, in place of plain "Loading…" text. Matches the surface/
+ * border tokens used everywhere else so it doesn't look bolted-on.
+ * ────────────────────────────────────────────────────────────────────────── */
+.skeleton-bar {
+  display: inline-block;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-2) 25%,
+    var(--color-border) 37%,
+    var(--color-surface-2) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeletonShimmer 1.4s ease infinite;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-bar { animation: none; }
+}

@@ -1,0 +1,12 @@
+# Supabase project configuration (for CLI-based workflows:
+# `npx supabase functions serve gateway` / `npx supabase functions deploy gateway`)
+
+project_id = "keyroute"
+
+[functions.gateway]
+# The gateway authenticates callers with its own platform keys (Bearer pk_live_...)
+# validated against the database — NOT with Supabase JWTs. JWT verification must
+# stay off or every platform-key request would be rejected before reaching the
+# function. The same flag is set programmatically by the one-click deploy flow
+# (Connections page → "Deploy Gateway") via the Management API.
+verify_jwt = false
