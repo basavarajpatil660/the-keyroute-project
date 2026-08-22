@@ -183,8 +183,8 @@ const SELF_HOST_EXAMPLES = [
   {
     label: 'Clone & install',
     language: 'bash',
-    code: `git clone https://github.com/YOUR_GITHUB_USERNAME/keyroute.git
-cd keyroute
+    code: `git clone https://github.com/basavarajpatil660/the-keyroute-project.git
+cd the-keyroute-project
 npm install`,
   },
   {
@@ -199,9 +199,8 @@ cp .env.example .env.local
 VITE_SUPABASE_URL="https://your-project-ref.supabase.co"
 VITE_SUPABASE_ANON_KEY="your-anon-key"
 
-# Server-side proxy (no prefix — used by the /api edge function only)
-SUPABASE_URL="https://your-project-ref.supabase.co"
-SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"`,
+# That's all — the gateway edge function gets SUPABASE_URL and
+# SUPABASE_SERVICE_ROLE_KEY injected by Supabase automatically.`,
   },
   {
     label: 'Run locally',

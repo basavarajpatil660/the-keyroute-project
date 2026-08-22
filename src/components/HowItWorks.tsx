@@ -36,7 +36,7 @@ const STEPS = [
     snippet: {
       label: 'curl example',
       lines: [
-        { type: 'curl', text: 'curl http://localhost:3000/api/v1/chat/completions \\' },
+        { type: 'curl', text: 'curl "$KEYROUTE_URL/chat/completions" \\' },
         { type: 'curl', text: '  -H "Authorization: Bearer $KEYROUTE_KEY" \\' },
         { type: 'string', text: '  -d \'{"model": "openai-work/gpt-4o", ...}\'' },
       ],

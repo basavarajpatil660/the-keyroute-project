@@ -65,13 +65,6 @@ const BugIcon = () => (
   </svg>
 )
 
-const MailIcon = () => (
-  <svg width={ICON_SIZE} height={ICON_SIZE} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-    <polyline points="22,6 12,13 2,6" />
-  </svg>
-)
-
 const WHY_CHOOSE = [
   {
     title: 'Your Own Supabase',
@@ -109,23 +102,16 @@ const GET_INVOLVED = [
   {
     title: 'Suggest Features',
     description: 'Open an issue with your idea — we read every one.',
-    href: 'https://github.com/YOUR_GITHUB_USERNAME/keyroute/issues',
+    href: 'https://github.com/basavarajpatil660/the-keyroute-project/issues',
     external: true,
     icon: <IssueIcon />,
   },
   {
     title: 'Report Bugs',
     description: 'Found something broken? File a bug so we can fix it.',
-    href: 'https://github.com/YOUR_GITHUB_USERNAME/keyroute/issues',
+    href: 'https://github.com/basavarajpatil660/the-keyroute-project/issues',
     external: true,
     icon: <BugIcon />,
-  },
-  {
-    title: 'Get Support',
-    description: 'Questions? Email us directly.',
-    href: 'mailto:YOUR_EMAIL_HERE',
-    external: false,
-    icon: <MailIcon />,
   },
 ]
 
@@ -205,9 +191,9 @@ export function GetInvolvedSection() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: 'repeat(2, 1fr)',
             gap: 20,
-            maxWidth: 800,
+            maxWidth: 560,
             margin: '0 auto',
           }}
           className="get-involved-grid"

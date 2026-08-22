@@ -24,19 +24,9 @@ const ENV_VARS = [
     desc: 'The public "anon" key. Safe to expose in the browser — row-level security policies protect your data, not the secrecy of this key.',
   },
   {
-    name: 'SUPABASE_URL',
-    required: true,
-    desc: 'The same project URL as above, read server-side by the /api gateway function (no VITE_ prefix).',
-  },
-  {
-    name: 'SUPABASE_SERVICE_ROLE_KEY',
-    required: true,
-    desc: 'The "service_role" key. Bypasses all RLS policies — used only by the server-side API function. Never commit it and never ship it to the browser.',
-  },
-  {
     name: 'VITE_APP_BASE_URL',
     required: false,
-    desc: 'Optional. The public origin of your own deployment (no trailing slash), used as the default gateway base URL in docs examples. Defaults to http://localhost:3000 for local dev.',
+    desc: "Optional, hosted-instance only: sets the origin shown in the docs page's code samples for the hosted gateway (…/api/v1). Self-hosted installs don't need it — after Deploy Gateway finishes, your real gateway URL is https://<your-project-ref>.supabase.co/functions/v1/gateway.",
   },
 ]
 
@@ -145,8 +135,8 @@ export function SetupPage() {
           <StepHeader number="02" title="Clone the repo & install dependencies" />
           <CodeBlock
             language="bash"
-            code={`git clone https://github.com/YOUR_GITHUB_USERNAME/keyroute.git
-cd keyroute
+            code={`git clone https://github.com/basavarajpatil660/the-keyroute-project.git
+cd the-keyroute-project
 npm install`}
           />
           <Callout>
@@ -170,9 +160,9 @@ npm install`}
           </div>
           <div className="surface-card" style={{ marginTop: 20, overflow: 'hidden' }}>
             {[
-              { name: 'Project URL', desc: 'Looks like https://your-project-ref.supabase.co' },
-              { name: 'Project API keys → anon public', desc: 'Safe for the browser; protected by RLS.' },
-              { name: 'Project API keys → service_role', desc: 'Server-side secret. Treat it like a password.' },
+              { name: 'Project URL', desc: 'Looks like https://your-project-ref.supabase.co — goes into .env.local as VITE_SUPABASE_URL in the next step.' },
+              { name: 'Project API keys → anon public', desc: 'Goes into .env.local as VITE_SUPABASE_ANON_KEY. Safe for the browser; protected by RLS.' },
+              { name: 'Project API keys → service_role', desc: 'Not needed in .env.local — your gateway edge function gets its service credentials injected automatically. You will only paste this later on the Connections page if you use the optional "Connect" feature, where it is AES-encrypted via Vault before storage.' },
             ].map((row, i, arr) => (
               <div
                 key={row.name}
@@ -195,7 +185,8 @@ npm install`}
         <section id="env" style={{ marginBottom: 56 }}>
           <StepHeader number="04" title="Configure .env.local" />
           <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 20 }}>
-            Copy the example file, then fill in each value from the previous step:
+            Copy the example file, then fill in the two required values from the previous step
+            (the optional one can be left as-is):
           </p>
           <CodeBlock language="bash" code={`cp .env.example .env.local`} />
           <div className="surface-card" style={{ marginTop: 20, overflow: 'hidden' }}>
@@ -311,9 +302,14 @@ npx supabase db push --db-url "postgresql://postgres:YOUR-PASSWORD@db.your-proje
             ))}
           </div>
           <Callout accent="indigo">
-            Ready to go public? Deploy the repo to any platform that supports Vercel-style serverless
-            functions (it ships with a <code>vercel.json</code>) and set the same environment
-            variables from step 04 there instead of in <code>.env.local</code>.
+            Want the dashboard reachable at a real URL instead of <code>localhost</code>? You can
+            optionally deploy this repo's control-panel UI to any platform that can build and host a
+            Vite app (it ships with a <code>vercel.json</code> for Vercel) and set the{' '}
+            <code>VITE_</code> variables from step 04 there instead of in <code>.env.local</code>.
+            This hosts the dashboard only — the gateway itself is already permanently live inside your
+            Supabase project at{' '}
+            <code>https://&lt;your-project-ref&gt;.supabase.co/functions/v1/gateway</code>, no matter
+            where — or whether — the dashboard is deployed.
           </Callout>
         </section>
 
