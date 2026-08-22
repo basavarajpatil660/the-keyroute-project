@@ -1,32 +1,39 @@
-# React + TypeScript + Vite
+# Keyroute
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+![Keyroute](docs/hero-dark.png)
 
-Currently, two official plugins are available:
+Keyroute is an OpenAI-compatible AI API gateway: put all of your provider API keys behind a single endpoint and route to any of them just by prefixing the model name. A request for `"openai-work/gpt-4o"` goes to your OpenAI key labelled `openai-work`; `"groq-fast/llama-3.1-8b-instant"` goes to your Groq key — same request shape, one base URL, no SDK changes. Usage per key is logged automatically, and provider keys are encrypted with Supabase Vault, never stored in plaintext. Works with OpenAI, Groq, Gemini's OpenAI-compatible layer, and any custom OpenAI-compatible base URL (Anthropic support is in progress).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Two ways to use it
 
-## React Compiler
+**Option A — Hosted.** Sign up on the running instance, paste your provider keys, and use the hosted gateway URL as your base URL.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Option B — Self-hosted.** Run Deploy Gateway from `/setup` and Keyroute provisions itself into *your own* free Supabase project: schema migrations are applied, the gateway edge function is deployed, and you get your own gateway URL that runs independently of this app forever.
 
-## Expanding the Oxlint configuration
+See `/help` and `/docs` on the running app for the full walkthrough of both paths — they cover everything in detail and stay up to date with the product, so this README won't duplicate them.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Quickstart (self-hosted)
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+git clone https://github.com/basavarajpatil660/the-keyroute-project.git
+cd the-keyroute-project
+npm install
+cp .env.example .env.local   # fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY from your Supabase project
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Then open `http://localhost:5173/setup`, create a free project at [database.new](https://database.new) if you don't have one, generate a [personal access token](https://supabase.com/dashboard/account/tokens), and click **Deploy Gateway**. That's the whole install.
+
+## Why self-host?
+
+- **Your data stays yours.** Keys, labels, usage logs, and connections live entirely inside your own Supabase project — row-level security scopes every query to your account, and nothing is mirrored anywhere else.
+- **The gateway doesn't need you.** Once deployed, the edge function runs permanently in your Supabase project. Close the dashboard, shut down your laptop — client requests still route and log exactly the same.
+- **No vendor lock-in.** It's your project, your region, your data. Delete it whenever you like.
+
+## Contributing
+
+Issues and pull requests are welcome — bug reports, self-hosting fixes, and provider integrations (especially Anthropic) are all useful. No formal process yet; just open an issue first for anything large so we can avoid wasted work.
+
+## Credits & license
+
+Built by [Basavaraj M Patil](https://github.com/basavarajpatil660). Released under the [MIT License](LICENSE).
