@@ -161,9 +161,9 @@ export function DashboardLayout() {
   }
 
   // No early return when session is null: this layout also renders the
-  // Connections page BEFORE any owner account exists (Deploy Gateway lives
-  // there and is what creates the account). The user section below falls
-  // back to a "not connected" hint in that state.
+  // Connections page BEFORE any owner account exists (the setup guide and
+  // its "Create owner account & sign in" button live there). The user
+  // section below falls back to a "not connected" hint in that state.
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: 'var(--color-base)', overflow: 'hidden' }}>
@@ -352,7 +352,7 @@ export function DashboardLayout() {
               <p style={{ fontSize: 12, fontWeight: 600, color: session ? 'var(--color-text-primary)' : 'var(--color-text-faint)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {session?.user.email ?? 'No owner account yet'}
               </p>
-              <p style={{ fontSize: 11, color: 'var(--color-text-faint)' }}>{session ? 'Free plan' : 'Run Deploy Gateway to create one'}</p>
+              <p style={{ fontSize: 11, color: 'var(--color-text-faint)' }}>{session ? 'Free plan' : 'Finish setup on the Connections page'}</p>
             </div>
           </div>
         </div>

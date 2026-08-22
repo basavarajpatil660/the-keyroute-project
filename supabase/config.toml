@@ -7,6 +7,14 @@ project_id = "keyroute"
 # The gateway authenticates callers with its own platform keys (Bearer pk_live_...)
 # validated against the database — NOT with Supabase JWTs. JWT verification must
 # stay off or every platform-key request would be rejected before reaching the
-# function. The same flag is set programmatically by the one-click deploy flow
-# (Connections page → "Deploy Gateway") via the Management API.
+# function. `npx supabase functions deploy gateway` reads this file, so plain
+# deploys already respect it; the setup guide also passes --no-verify-jwt
+# explicitly to be safe.
 verify_jwt = false
+
+[auth.email]
+# Keyroute's silent owner account signs up with a random machine-generated
+# email and has no inbox to click confirmation links, so email confirmations
+# must stay off or signUp returns no session. Applied to your hosted project
+# by `npx supabase config push` (step 05 of the CLI setup guide).
+enable_confirmations = false

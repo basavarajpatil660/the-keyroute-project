@@ -10,6 +10,7 @@ const PREREQS = [
   { name: 'npm 10 or newer', note: 'Ships with Node. Check with npm -v.' },
   { name: 'Git', note: 'To clone the repository. Check with git --version.' },
   { name: 'A free Supabase account', note: 'Sign up at supabase.com — the free tier is enough to run everything.' },
+  { name: 'Supabase CLI (via npx)', note: "Invoked as npx supabase …, so there's nothing to install — npx fetches it on first use." },
 ]
 
 const ENV_VARS = [
@@ -26,14 +27,14 @@ const ENV_VARS = [
   {
     name: 'VITE_APP_BASE_URL',
     required: false,
-    desc: "Optional, hosted-instance only: sets the origin shown in the docs page's code samples for the hosted gateway (…/api/v1). Self-hosted installs don't need it — after Deploy Gateway finishes, your real gateway URL is https://<your-project-ref>.supabase.co/functions/v1/gateway.",
+    desc: "Optional, hosted-instance only: sets the origin shown in the docs page's code samples for the hosted gateway (…/api/v1). Self-hosted installs don't need it — once the CLI setup below has run, your real gateway URL is https://<your-project-ref>.supabase.co/functions/v1/gateway.",
   },
 ]
 
 const NEXT_STEPS = [
   {
-    title: 'Deploy the gateway',
-    description: 'On the Connections page, click "Deploy Gateway" with a Supabase personal access token. It applies the migrations and provisions the always-on edge function inside your project — after that, this dashboard never needs to be open again.',
+    title: 'Provision your project with the CLI',
+    description: 'On the Connections page, run the five Supabase CLI commands (login, link, db push, functions deploy, config push) and click "Create owner account & sign in". After that, the gateway lives permanently inside your Supabase project — this dashboard never needs to be open again.',
     to: '/dashboard/connections',
     label: 'Dashboard → Connections',
   },
@@ -229,30 +230,41 @@ npm install`}
           </Callout>
         </section>
 
-        {/* Step 5 — Migrations */}
+        {/* Step 5 — Provision via CLI */}
         <section id="migrations" style={{ marginBottom: 56 }}>
-          <StepHeader number="05" title="Run the SQL migrations" />
+          <StepHeader number="05" title="Provision your project with the Supabase CLI" />
           <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 20 }}>
-            The database schema lives as plain SQL in <code>supabase/migrations</code>. Apply it to
-            your new project with the Supabase CLI:
+            The database schema lives as plain SQL in <code>supabase/migrations</code> — tables, RLS
+            policies, encryption helpers, and the RPC functions the app and gateway rely on — and
+            the gateway itself is a Deno function in <code>supabase/functions/gateway</code>. A few
+            CLI commands provision both into your new project:
           </p>
           <CodeBlock
             language="bash"
-            code={`# Option A — link your project once, then push
+            code={`# One-time: authenticate the CLI and link it to your project
 npx supabase login
 npx supabase link --project-ref your-project-ref
+
+# Apply every migration in supabase/migrations, in order
 npx supabase db push
 
-# Option B — push directly against the connection string
-# (Settings → Database → Connection string)
-npx supabase db push --db-url "postgresql://postgres:YOUR-PASSWORD@db.your-project-ref.supabase.co:5432/postgres"`}
+# Deploy the always-on gateway edge function into your project
+npx supabase functions deploy gateway --no-verify-jwt
+
+# Push supabase/config.toml settings to your project
+# (disables email confirmations — required by the silent owner account)
+npx supabase config push`}
           />
+          <Callout accent="indigo">
+            No terminal on this machine? The same five commands are listed with copy buttons on the{' '}
+            <strong style={{ color: 'var(--color-text-primary)' }}>Connections page</strong> of the
+            dashboard.
+          </Callout>
           <Callout>
-            These migrations create the tables, RLS policies, encryption helpers, and RPC functions
-            (key validation, provider-key resolution, usage logging) that the app and the gateway
-            edge function rely on. Prefer not to touch a terminal? The{' '}
-            <strong style={{ color: 'var(--color-text-primary)' }}>Deploy Gateway</strong> button on
-            the Connections page applies these same migrations for you via the Supabase Management API.
+            Migrations only (e.g. in CI) can also be pushed directly against a connection string,
+            without linking:{' '}
+            <code>npx supabase db push --db-url "postgresql://…"</code> from Settings → Database →
+            Connection string.
           </Callout>
         </section>
 
@@ -262,14 +274,16 @@ npx supabase db push --db-url "postgresql://postgres:YOUR-PASSWORD@db.your-proje
           <CodeBlock language="bash" code={`npm run dev`} />
           <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginTop: 20, marginBottom: 0 }}>
             Open <code>http://localhost:5173</code> — the landing page should render. There's no
-            login form: Deploy Gateway provisions a silent owner account for this install, so
-            opening the <Link to="/dashboard">dashboard</Link> just works (or routes you to{' '}
-            <Link to="/setup">setup</Link> if it hasn't been deployed yet).
+            login form: the Connections page's <strong style={{ color: 'var(--color-text-primary)' }}>Create
+            owner account &amp; sign in</strong> button provisions a silent owner account for this
+            install (after the CLI steps above), so opening the{' '}
+            <Link to="/dashboard">dashboard</Link> just works (or routes you to{' '}
+            <Link to="/setup">setup</Link> if it hasn't run yet).
           </p>
           <Callout accent="indigo">
-            The dashboard is a control panel only. Once you've clicked{' '}
-            <strong style={{ color: 'var(--color-text-primary)' }}>Deploy Gateway</strong> (Connections
-            page), your gateway runs permanently inside your own Supabase project at{' '}
+            The dashboard is a control panel only. Once you've run the CLI setup (the Connections
+            page walks through every command), your gateway runs permanently inside your own Supabase
+            project at{' '}
             <code>https://&lt;your-project-ref&gt;.supabase.co/functions/v1/gateway</code> — completely
             independent of this dev server or any other server staying open.
           </Callout>
@@ -303,8 +317,8 @@ npx supabase db push --db-url "postgresql://postgres:YOUR-PASSWORD@db.your-proje
           </div>
           <Callout accent="indigo">
             Want the dashboard reachable at a real URL instead of <code>localhost</code>? You can
-            optionally deploy this repo's control-panel UI to any platform that can build and host a
-            Vite app (it ships with a <code>vercel.json</code> for Vercel) and set the{' '}
+            optionally deploy this repo's control-panel UI to any static host or serverless platform
+            that can build and serve a Vite app (Netlify, Cloudflare Pages, Vercel, …) and set the{' '}
             <code>VITE_</code> variables from step 04 there instead of in <code>.env.local</code>.
             This hosts the dashboard only — the gateway itself is already permanently live inside your
             Supabase project at{' '}
