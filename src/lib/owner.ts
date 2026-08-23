@@ -66,7 +66,11 @@ export function hasOwnerCredentials(): boolean {
 }
 
 function generateOwnerEmail(): string {
-  return `owner-${crypto.randomUUID()}@local.keyroute`
+  // Must use a real, resolvable TLD — Supabase Auth (GoTrue) rejects synthetic
+  // domains like ".keyroute" with email_address_invalid. basavaraj.dev is the
+  // project maintainer's; these accounts are auto-confirmed (mailer_autoconfirm)
+  // and never send or receive actual mail.
+  return `owner-${crypto.randomUUID()}@local.basavaraj.dev`
 }
 
 function generateOwnerPassword(): string {
