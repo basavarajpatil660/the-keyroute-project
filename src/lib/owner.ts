@@ -66,11 +66,14 @@ export function hasOwnerCredentials(): boolean {
 }
 
 function generateOwnerEmail(): string {
-  // Must use a real, resolvable TLD — Supabase Auth (GoTrue) rejects synthetic
-  // domains like ".keyroute" with email_address_invalid. basavaraj.dev is the
-  // project maintainer's; these accounts are auto-confirmed (mailer_autoconfirm)
-  // and never send or receive actual mail.
-  return `owner-${crypto.randomUUID()}@local.basavaraj.dev`
+  // Must be a domain with a real, resolvable TLD — Supabase Auth (GoTrue)
+  // rejects synthetic domains like ".keyroute" with email_address_invalid.
+  // example.com is the RFC 2606 reserved placeholder domain: real and
+  // resolving (so it passes the validator), yet owned by nobody in
+  // particular — safe for any self-hoster, not tied to an individual.
+  // These accounts are auto-confirmed (mailer_autoconfirm) and never send
+  // or receive actual mail.
+  return `owner-${crypto.randomUUID()}@example.com`
 }
 
 function generateOwnerPassword(): string {
