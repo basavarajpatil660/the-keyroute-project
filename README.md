@@ -2,11 +2,21 @@
 
 **One URL. Every AI provider you use. Running entirely inside your own Supabase project — not ours, not anyone's.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Self-hosted](https://img.shields.io/badge/hosting-self--hosted-blue.svg)](#deployment-options--which-one-should-i-pick)
-[![Made with Supabase](https://img.shields.io/badge/backend-Supabase-3ECF8E.svg)](https://supabase.com)
+[![License: MIT](https://img.shields.io/github/license/basavarajpatil660/the-keyroute-project?style=for-the-badge&color=yellow)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/basavarajpatil660/the-keyroute-project?style=for-the-badge&color=gold)](https://github.com/basavarajpatil660/the-keyroute-project/stargazers)
+[![Issues](https://img.shields.io/github/issues/basavarajpatil660/the-keyroute-project?style=for-the-badge&color=orange)](https://github.com/basavarajpatil660/the-keyroute-project/issues)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](https://github.com/basavarajpatil660/the-keyroute-project/pulls)
+
+[![React](https://img.shields.io/badge/React_19-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev)
+[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com)
+[![Deno](https://img.shields.io/badge/Deno_Edge_Functions-000000?style=flat-square&logo=deno&logoColor=white)](https://deno.land)
+[![Vercel](https://img.shields.io/badge/Vercel_optional-000000?style=flat-square&logo=vercel&logoColor=white)](https://vercel.com)
 
 Keyroute is a self-hostable AI API gateway. You add the provider keys you already have — OpenAI, Groq, Gemini, or any custom OpenAI-compatible endpoint — give each one a short label, and get back **one URL** that works with any existing OpenAI SDK. Switching providers or rotating a key later means changing one word in your code, not touching your app.
+
+**[Quick start](#quick-start) · [Full setup guide](SETUP.md) · [Why this exists](#why-this-exists) · [Report a bug](https://github.com/basavarajpatil660/the-keyroute-project/issues)**
 
 <p align="center">
   <img src="docs/homepage.png" alt="Keyroute homepage" width="800">
@@ -75,6 +85,22 @@ flowchart LR
 ```
 
 The React dashboard in this repo is a **control panel only** — it manages keys and shows usage by talking to the same Supabase project through the normal client library, protected by row-level security. It is never in the path of an actual AI request. The Edge Function handles that directly, independently, permanently.
+
+---
+
+## Keyroute vs. a typical hosted AI gateway
+
+|  | **Typical hosted gateway** | **Keyroute (self-hosted)** |
+|---|---|---|
+| Where your provider keys live | Their servers | Your own Supabase project |
+| Who can see your prompts in transit | Their infrastructure, by design | Nobody — direct pass-through to your provider |
+| What happens if they shut down / pivot | Your gateway stops working | Nothing — it's yours, it keeps running |
+| Monthly cost | Often a paid tier past a free quota | Free, forever, on Supabase's free tier |
+| Setup effort | Sign up, done | One click, ~5 minutes (see below) |
+| Data ownership | Shared / theirs | Entirely yours |
+| Vendor lock-in | Yes | No — MIT licensed, fork it any time |
+
+This isn't a knock on hosted gateways — they're genuinely faster to try. Keyroute exists for the moment you decide you'd rather not hand a third party your provider keys for anything that matters.
 
 ---
 
@@ -232,6 +258,14 @@ Supabase bundles Postgres, auth, encrypted secret storage (Vault), and serverles
 <br>
 Open an issue on this repository, or reach out at hello@basavaraj.dev.
 </details>
+
+---
+
+## Star history
+
+If Keyroute is useful to you, a star helps other people find it — that's genuinely the only marketing this project has.
+
+[![Star History Chart](https://api.star-history.com/svg?repos=basavarajpatil660/the-keyroute-project&type=Date)](https://star-history.com/#basavarajpatil660/the-keyroute-project&Date)
 
 ---
 
