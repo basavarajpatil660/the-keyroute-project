@@ -9,6 +9,8 @@ const DocsPage = lazy(() => import('./pages/DocsPage').then(m => ({ default: m.D
 const SetupPage = lazy(() => import('./pages/SetupPage').then(m => ({ default: m.SetupPage })))
 const HelpPage = lazy(() => import('./pages/HelpPage').then(m => ({ default: m.HelpPage })))
 const PricingPage = lazy(() => import('./pages/PricingPage').then(m => ({ default: m.PricingPage })))
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })))
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then(m => ({ default: m.TermsOfServicePage })))
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
@@ -46,6 +48,8 @@ export default function App() {
               <Route path="/setup" element={<SetupPage />} />
               <Route path="/help" element={<HelpPage />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms" element={<TermsOfServicePage />} />
               {/* Dashboard uses nested routes internally */}
               <Route path="/dashboard/*" element={<DashboardPage />} />
               {/* Catch-all 404 */}

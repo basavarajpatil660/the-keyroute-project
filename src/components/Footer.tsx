@@ -74,8 +74,8 @@ export function Footer() {
               Legal
             </p>
             <nav style={{ display: 'flex', flexDirection: 'column', gap: 8 }} aria-label="Footer legal links">
-              <FooterLink to="#">Privacy Policy</FooterLink>
-              <FooterLink to="#">Terms of Service</FooterLink>
+              <FooterLink to="/privacy">Privacy Policy</FooterLink>
+              <FooterLink to="/terms">Terms of Service</FooterLink>
             </nav>
           </div>
         </div>
