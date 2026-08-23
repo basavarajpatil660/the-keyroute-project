@@ -4,25 +4,11 @@ import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { TabbedCode } from '../components/CodeBlock'
 
-// ─── Deployment modes ───────────────────────────────────────────────────────
-// Keyroute runs two ways: a deployed copy maintained by the project's
-// hosts ("hosted"), or your own self-hosted gateway living inside your
-// own Supabase project as an edge function.
-// Every base URL and code sample below reacts to this toggle.
+// ─── Base URL ───────────────────────────────────────────────────────────────
+// Keyroute is self-hosted: every code sample targets the gateway edge
+// function inside YOUR own Supabase project.
 
-type DeployMode = 'hosted' | 'local'
-
-const DEPLOYED_ORIGIN = (import.meta.env.VITE_APP_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '')
-
-const BASE_URLS: Record<DeployMode, string> = {
-  hosted: `${DEPLOYED_ORIGIN}/api/v1`,
-  local: 'https://your-project-ref.supabase.co/functions/v1/gateway',
-}
-
-const DEPLOY_LABELS: Record<DeployMode, string> = {
-  hosted: 'Hosted instance',
-  local: 'Self-hosted / local',
-}
+const BASE_URL = 'https://your-project-ref.supabase.co/functions/v1/gateway'
 
 // ─── Code examples (generated per deploy mode) ─────────────────────────────
 
@@ -190,7 +176,7 @@ npm install`,
   {
     label: '.env setup',
     language: 'bash',
-    code: `# .env.local — this is YOUR project, not anyone else's hosted one.
+    code: `# .env.local — this is YOUR project.
 # Copy the example file, then fill in your own Supabase values from
 # Project Settings → API in your Supabase dashboard.
 cp .env.example .env.local
@@ -237,11 +223,9 @@ const DOC_SECTIONS = [
 export function DocsPage() {
   const [activeSection, setActiveSection] = useState('quickstart')
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  const [deployMode, setDeployMode] = useState<DeployMode>('hosted')
 
-  const baseUrl = BASE_URLS[deployMode]
-  const quickstartExamples = getQuickstartExamples(baseUrl)
-  const routingExamples = getRoutingExamples(baseUrl)
+  const quickstartExamples = getQuickstartExamples(BASE_URL)
+  const routingExamples = getRoutingExamples(BASE_URL)
 
   const scrollTo = (id: string) => {
     setActiveSection(id)
@@ -297,35 +281,6 @@ export function DocsPage() {
               </button>
             ))}
           </nav>
-
-          {/* Deploy mode toggle — sticks with you as you scroll the sidebar */}
-          <div style={{ padding: '20px 20px 0', marginTop: 20, borderTop: '1px solid var(--color-border-muted)' }}>
-            <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-faint)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-              I'm running
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {(['hosted', 'local'] as DeployMode[]).map(mode => (
-                <button
-                  key={mode}
-                  onClick={() => setDeployMode(mode)}
-                  style={{
-                    textAlign: 'left',
-                    padding: '7px 10px',
-                    fontSize: 13,
-                    borderRadius: 6,
-                    border: '1px solid ' + (deployMode === mode ? 'rgba(240,165,0,0.4)' : 'var(--color-border-muted)'),
-                    background: deployMode === mode ? 'var(--color-amber-glow)' : 'transparent',
-                    color: deployMode === mode ? 'var(--color-amber)' : 'var(--color-text-muted)',
-                    cursor: 'pointer',
-                    fontFamily: 'var(--font-body)',
-                    fontWeight: deployMode === mode ? 600 : 400,
-                  }}
-                >
-                  {DEPLOY_LABELS[mode]}
-                </button>
-              ))}
-            </div>
-          </div>
         </aside>
 
         {/* Mobile nav toggle */}
@@ -417,31 +372,6 @@ export function DocsPage() {
                   {s.label}
                 </button>
               ))}
-
-              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-faint)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '20px 0 12px' }}>
-                I'm running
-              </p>
-              <div style={{ display: 'flex', gap: 8 }}>
-                {(['hosted', 'local'] as DeployMode[]).map(mode => (
-                  <button
-                    key={mode}
-                    onClick={() => setDeployMode(mode)}
-                    style={{
-                      flex: 1,
-                      padding: '10px',
-                      fontSize: 13,
-                      borderRadius: 8,
-                      border: '1px solid ' + (deployMode === mode ? 'rgba(240,165,0,0.4)' : 'var(--color-border-muted)'),
-                      background: deployMode === mode ? 'var(--color-amber-glow)' : 'transparent',
-                      color: deployMode === mode ? 'var(--color-amber)' : 'var(--color-text-muted)',
-                      cursor: 'pointer',
-                      fontWeight: deployMode === mode ? 600 : 400,
-                    }}
-                  >
-                    {DEPLOY_LABELS[mode]}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
         )}
@@ -461,7 +391,7 @@ export function DocsPage() {
               Keyroute is drop-in compatible with the OpenAI client SDK and any HTTP client. You point your existing code at a new base URL, swap your API key for your Keyroute platform key, and prefix the model name with the label of the key you want to use.
             </p>
 
-            {/* Inline mode banner, in case someone lands mid-page from a link */}
+            {/* Base URL banner */}
             <div
               style={{
                 display: 'flex',
@@ -476,24 +406,18 @@ export function DocsPage() {
                 marginBottom: 32,
               }}
             >
-              <span>Showing examples for:</span>
-              <strong style={{ color: 'var(--color-amber)' }}>{DEPLOY_LABELS[deployMode]}</strong>
-              <span style={{ color: 'var(--color-text-faint)' }}>·</span>
-              <code style={{ color: 'var(--color-text-faint)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{baseUrl}</code>
-              <span style={{ color: 'var(--color-text-faint)' }}>(switch in the sidebar)</span>
+              <span>Every example targets your own gateway at:</span>
+              <code style={{ color: 'var(--color-text-faint)', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{BASE_URL}</code>
             </div>
 
-            <h2 style={{ fontSize: 20, marginBottom: 12 }}>Step 1 — Connect your Supabase project</h2>
+            <h2 style={{ fontSize: 20, marginBottom: 12 }}>Step 1 — Create a Supabase project & deploy the gateway</h2>
             <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 24 }}>
-              {deployMode === 'hosted' ? (
-                <>
-                  Open the <Link to="/dashboard/connections">dashboard</Link> and paste your Supabase project URL and service key. This is a one-time step. Keyroute encrypts the service key using Supabase Vault and stores only the ciphertext — it is never accessible in plaintext from our servers.
-                </>
-              ) : (
-                <>
-                  Create your own free Supabase project, then run the migrations in <code>supabase/migrations</code> against it (see the <a href="#self-hosting">Self-hosting</a> section below for exact commands). Everything — your data, your keys, your vault secrets — lives entirely in your own Supabase project. Nothing is shared with the hosted Keyroute instance.
-                </>
-              )}
+              Create your own free Supabase project, then open the{' '}
+              <Link to="/dashboard/connections">Connections page</Link> and click{' '}
+              <strong style={{ color: 'var(--color-text-primary)' }}>Deploy Gateway</strong> (see the{' '}
+              <a href="#self-hosting">Self-hosting</a> section below, or the{' '}
+              <Link to="/setup">setup guide</Link>, for the full walkthrough). Everything — your data, your
+              keys, your vault secrets — lives entirely in your own Supabase project.
             </p>
 
             <h2 style={{ fontSize: 20, marginBottom: 12 }}>Step 2 — Add provider keys</h2>
@@ -534,14 +458,16 @@ export function DocsPage() {
             >
               <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
                 <strong style={{ color: 'var(--color-text-primary)' }}>Why self-host:</strong>{' '}
-                Full control over your own data, no reliance on any third party staying online, and you can read every line of code handling your provider keys. This is the intended long-term way to run Keyroute — the hosted version is really just a convenience for trying it out.
+                Full control over your own data, no reliance on any third party staying online, and you can read every line of code handling your provider keys. This is the way Keyroute is meant to run.
               </p>
             </div>
 
             <TabbedCode examples={SELF_HOST_EXAMPLES} />
 
             <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginTop: 24 }}>
-              Once running, everything else on this page — routing, auto-detection, the API reference — works exactly the same. The only difference is the base URL, which is why every code sample above can be toggled between <strong>Hosted</strong> and <strong>Self-hosted / local</strong> using the switch in the sidebar.
+              Once running, everything else on this page — routing, auto-detection, the API reference —
+              targets that same base URL: your own gateway at{' '}
+              <code style={{ color: 'var(--color-text-faint)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>{BASE_URL}</code>.
             </p>
 
             <p style={{ fontSize: 14, color: 'var(--color-text-faint)', lineHeight: 1.7, marginTop: 16 }}>
@@ -558,7 +484,7 @@ export function DocsPage() {
               Prefix-in-model-string routing
             </h2>
             <p style={{ fontSize: 16, color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 24 }}>
-              The routing format is <code style={{ color: 'var(--color-amber)', background: 'var(--color-amber-glow)', padding: '2px 6px', borderRadius: 4 }}>label/model</code>. The part before the slash is the key label you assigned in the dashboard. The part after the slash is the model name as the provider expects it. This is identical whether you're on the hosted instance or your own self-hosted one.
+              The routing format is <code style={{ color: 'var(--color-amber)', background: 'var(--color-amber-glow)', padding: '2px 6px', borderRadius: 4 }}>label/model</code>. The part before the slash is the key label you assigned in the dashboard. The part after the slash is the model name as the provider expects it.
             </p>
 
             <div
@@ -665,7 +591,7 @@ export function DocsPage() {
               Endpoints
             </h2>
             <p style={{ fontSize: 16, color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 24 }}>
-              Keyroute exposes an OpenAI-compatible API. Any client that works with the OpenAI REST API will work with Keyroute — just change the base URL and API key. Base URL ({DEPLOY_LABELS[deployMode]}): <code style={{ color: 'var(--color-amber)' }}>{baseUrl}</code>
+              Keyroute exposes an OpenAI-compatible API. Any client that works with the OpenAI REST API will work with Keyroute — just change the base URL and API key. Base URL: <code style={{ color: 'var(--color-amber)' }}>{BASE_URL}</code>
             </p>
 
             <div
@@ -774,7 +700,7 @@ export function DocsPage() {
               }}
             >
               <p style={{ fontSize: 14, color: 'var(--color-text-faint)' }}>
-                Full reference documentation with request/response schemas is in progress. For now, treat Keyroute as a transparent proxy: the request body and response format match the provider's specification exactly, whether you're on the hosted instance or self-hosting.
+                Full reference documentation with request/response schemas is in progress. For now, treat Keyroute as a transparent proxy: the request body and response format match the provider's specification exactly.
               </p>
             </div>
           </section>

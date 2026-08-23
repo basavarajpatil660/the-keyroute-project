@@ -7,6 +7,7 @@ import { QueryProvider } from './context/QueryProvider'
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })))
 const DocsPage = lazy(() => import('./pages/DocsPage').then(m => ({ default: m.DocsPage })))
 const SetupPage = lazy(() => import('./pages/SetupPage').then(m => ({ default: m.SetupPage })))
+const VercelSetupPage = lazy(() => import('./pages/VercelSetupPage').then(m => ({ default: m.VercelSetupPage })))
 const HelpPage = lazy(() => import('./pages/HelpPage').then(m => ({ default: m.HelpPage })))
 const PricingPage = lazy(() => import('./pages/PricingPage').then(m => ({ default: m.PricingPage })))
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })))
@@ -46,6 +47,7 @@ export default function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/docs" element={<DocsPage />} />
               <Route path="/setup" element={<SetupPage />} />
+              <Route path="/setup/vercel" element={<VercelSetupPage />} />
               <Route path="/help" element={<HelpPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/privacy" element={<PrivacyPolicyPage />} />

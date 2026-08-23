@@ -23,16 +23,11 @@ const ENV_VARS = [
     required: true,
     desc: 'The public "anon" key. Safe to expose in the browser — row-level security policies protect your data, not the secrecy of this key.',
   },
-  {
-    name: 'VITE_APP_BASE_URL',
-    required: false,
-    desc: "Optional, hosted-instance only: sets the origin shown in the docs page's code samples for the hosted gateway (…/api/v1). Self-hosted installs don't need it — after Deploy Gateway finishes, your real gateway URL is https://<your-project-ref>.supabase.co/functions/v1/gateway.",
-  },
 ]
 
-// ─── Building blocks (styled after DocsPage / HowItWorks) ───────────────────
+// ─── Building blocks (shared with VercelSetupPage) ──────────────────────────
 
-function StepHeader({ number, title }: { number: string; title: string }) {
+export function StepHeader({ number, title }: { number: string; title: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 16 }}>
       <span
@@ -50,7 +45,7 @@ function StepHeader({ number, title }: { number: string; title: string }) {
   )
 }
 
-function Callout({ children, accent = 'amber' }: { children: React.ReactNode; accent?: 'amber' | 'indigo' }) {
+export function Callout({ children, accent = 'amber' }: { children: React.ReactNode; accent?: 'amber' | 'indigo' }) {
   return (
     <div
       style={{
@@ -165,8 +160,7 @@ npm install`}
         <section id="env" style={{ marginBottom: 56 }}>
           <StepHeader number="04" title="Configure .env.local" />
           <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 20 }}>
-            Copy the example file, then fill in the two required values from the previous step
-            (the optional one can be left as-is):
+            Copy the example file, then fill in the two values from the previous step:
           </p>
           <CodeBlock language="bash" code={`cp .env.example .env.local`} />
           <div className="surface-card" style={{ marginTop: 20, overflow: 'hidden' }}>
@@ -413,15 +407,35 @@ npx supabase db push`}
           <StepHeader number="12" title="Optional: host the dashboard remotely instead of localhost" />
           <Callout accent="indigo">
             Want the dashboard reachable at a real URL instead of <code>localhost</code>? You can optionally
-            deploy this repo's control-panel UI to any static host that can build a Vite app (Vercel is one
-            option, not a requirement — Netlify, Cloudflare Pages, and others work the same way) and set
-            the <code>VITE_</code> variables from step 04 there instead of in <code>.env.local</code>. Both
-            modes are first-class: locally, the dev server serves the /api proxy endpoints itself; hosted,
-            the same endpoints run as serverless functions. This hosts the dashboard only — the gateway
-            itself is already permanently live inside your Supabase project at{' '}
+            deploy this repo's control-panel UI to your own Vercel account (or any static host that can
+            build a Vite app) and set the <code>VITE_</code> variables from step 04 there instead of in{' '}
+            <code>.env.local</code>. Both modes are first-class: locally, the dev server serves the /api
+            proxy endpoints itself; hosted, the same endpoints run as serverless functions. This hosts the
+            dashboard only — the gateway itself is already permanently live inside your Supabase project at{' '}
             <code>https://&lt;your-project-ref&gt;.supabase.co/functions/v1/gateway</code>, no matter where —
             or whether — the dashboard is deployed.
           </Callout>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 16,
+              flexWrap: 'wrap',
+              border: '1px solid var(--color-border-muted)',
+              borderRadius: 'var(--radius-md)',
+              padding: '16px 20px',
+              background: 'var(--color-surface-2)',
+              marginTop: 16,
+            }}
+          >
+            <p style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
+              Full walkthrough with every click, build setting, and environment variable:
+            </p>
+            <Link to="/setup/vercel" className="btn-primary" style={{ padding: '8px 18px', fontSize: 14, flexShrink: 0 }}>
+              See the full Vercel deployment guide →
+            </Link>
+          </div>
         </section>
 
         {/* Cross-link */}

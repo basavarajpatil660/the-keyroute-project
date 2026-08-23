@@ -4,13 +4,11 @@
 
 Keyroute is an OpenAI-compatible AI API gateway: put all of your provider API keys behind a single endpoint and route to any of them just by prefixing the model name. A request for `"openai-work/gpt-4o"` goes to your OpenAI key labelled `openai-work`; `"groq-fast/llama-3.1-8b-instant"` goes to your Groq key — same request shape, one base URL, no SDK changes. Usage per key is logged automatically, and provider keys are encrypted with Supabase Vault, never stored in plaintext. Works with OpenAI, Groq, Gemini's OpenAI-compatible layer, and any custom OpenAI-compatible base URL (Anthropic support is in progress).
 
-## Two ways to use it
+## How to use it
 
-**Option A — Hosted.** Sign up on the running instance, paste your provider keys, and use the hosted gateway URL as your base URL.
+Self-hosting is the way Keyroute runs: Deploy Gateway from `/setup` and Keyroute provisions itself into *your own* free Supabase project — schema migrations are applied, the gateway edge function is deployed, and you get your own gateway URL that runs independently of this app forever.
 
-**Option B — Self-hosted.** Run Deploy Gateway from `/setup` and Keyroute provisions itself into *your own* free Supabase project: schema migrations are applied, the gateway edge function is deployed, and you get your own gateway URL that runs independently of this app forever.
-
-See `/help` and `/docs` on the running app for the full walkthrough of both paths — they cover everything in detail and stay up to date with the product, so this README won't duplicate them.
+See `/help` and `/docs` on the running app for the full walkthrough — they cover everything in detail and stay up to date with the product, so this README won't duplicate them.
 
 ## Quickstart (self-hosted)
 
