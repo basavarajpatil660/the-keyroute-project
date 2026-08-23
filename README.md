@@ -259,13 +259,7 @@ Supabase bundles Postgres, auth, encrypted secret storage (Vault), and serverles
 Open an issue on this repository, or reach out at hello@basavaraj.dev.
 </details>
 
----
 
-## Star history
-
-If Keyroute is useful to you, a star helps other people find it — that's genuinely the only marketing this project has.
-
-[![Star History Chart](https://api.star-history.com/svg?repos=basavarajpatil660/the-keyroute-project&type=Date)](https://star-history.com/#basavarajpatil660/the-keyroute-project&Date)
 
 ---
 
