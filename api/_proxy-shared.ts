@@ -65,6 +65,11 @@ export function isValidProjectRef(ref: unknown): ref is string {
 // body straight back to the browser (with CORS added). Uses plain fetch() so
 // it behaves identically under Vercel's edge runtime and plain Node.
 //
+// A FormData body bypasses JSON serialization AND skips the manual
+// Content-Type header entirely — fetch generates the multipart boundary
+// itself. Hand-setting Content-Type on a FormData body is what produces
+// "Invalid multipart boundary" errors on /functions/deploy.
+//
 // Only NETWORK-level failures throw here - HTTP error statuses still come
 // back as a normal Response so callers can surface the upstream message.
 export async function forward(
@@ -72,15 +77,22 @@ export async function forward(
   path: string,
   init?: { method?: string; body?: unknown },
 ): Promise<Response> {
+  const isMultipart = typeof FormData !== 'undefined' && init?.body instanceof FormData
   let upstream: Response
   try {
     upstream = await fetch(`${SUPABASE_MANAGEMENT_API}${path}`, {
       method: init?.method ?? 'POST',
-      headers: {
-        Authorization: `Bearer ${pat}`,
-        'Content-Type': 'application/json',
-      },
-      body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
+      headers: isMultipart
+        ? { Authorization: `Bearer ${pat}` }
+        : {
+            Authorization: `Bearer ${pat}`,
+            'Content-Type': 'application/json',
+          },
+      body: isMultipart
+        ? (init?.body as FormData)
+        : init?.body !== undefined
+          ? JSON.stringify(init.body)
+          : undefined,
     })
   } catch {
     throw new Error(
