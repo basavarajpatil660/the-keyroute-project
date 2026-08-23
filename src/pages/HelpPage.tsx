@@ -71,9 +71,9 @@ export function HelpPage() {
           </p>
           <h2 style={{ fontSize: 24, marginBottom: 12 }}>Self-host it into your own Supabase project</h2>
           <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
-            A few Supabase CLI commands provision the whole gateway into <em>your</em> Supabase
-            project as an always-on edge function. After that, the gateway runs entirely inside your
-            own account &mdash; nothing runs on anyone else's servers, and closing this website,
+            One click deploys the whole gateway into <em>your</em> Supabase project as an
+            always-on edge function. After that, the gateway runs entirely inside your own
+            account &mdash; nothing runs on anyone else's servers, and closing this website,
             your terminal, or your laptop changes nothing. This dashboard is just a remote
             control: open it when you want to look at stats or manage keys; ignore it the
             rest of the time and the gateway keeps working.
@@ -92,10 +92,10 @@ export function HelpPage() {
             }}
           >
             <Link to="/dashboard/connections" className="btn-primary" style={{ fontSize: 14, flexShrink: 0 }}>
-              Self-host setup →
+              Deploy Gateway →
             </Link>
             <span style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
-              Connections page &rarr; copy-paste the five CLI commands, then click &ldquo;Create owner account &amp; sign in&rdquo;. No personal access token, no third-party host.
+              Connections page &rarr; &ldquo;Deploy Gateway&rdquo; &mdash; migrations plus the edge function, provisioned into your project.
             </span>
           </div>
         </section>

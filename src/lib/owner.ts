@@ -2,8 +2,7 @@
 //
 // Self-hosted Keyroute has no visible login/signup UI. Instead, exactly one
 // machine-generated "owner" Supabase Auth user is provisioned per install
-// (via the Connections page's "Create owner account & sign in" button, after
-// the Supabase CLI setup has run) and every RPC's auth.uid() resolves to it.
+// (during Deploy Gateway) and every RPC's auth.uid() resolves to it.
 //
 // Credentials live in ONE place: a single namespaced localStorage key, kept
 // only so this browser can silently re-authenticate if the supabase-js
@@ -110,9 +109,8 @@ export async function restoreOwnerSession(): Promise<boolean> {
 }
 
 /**
- * Provision the silent owner account. Called once by the Connections page's
- * "Create owner account & sign in" button, after the Supabase CLI setup
- * (migrations, function deploy, config push) has completed:
+ * Provision the silent owner account. Called once by Deploy Gateway after
+ * migrations succeed:
  * - If this browser already has owner credentials, re-authenticate with them
  *   instead of creating a second account.
  * - Otherwise create a fresh random owner via signUp and store its
@@ -163,7 +161,7 @@ export async function provisionOwnerAccount(): Promise<{ email: string; mode: 'c
 
     if (!data.session) {
       throw new Error(
-        'Owner account created, but this project requires email confirmation, so no session was issued. Run `npx supabase config push` (or disable "Confirm email" under Authentication → Providers → Email), then click "Create owner account & sign in" again.'
+        'Owner account created, but this project requires email confirmation, so no session was issued. Disable "Confirm email" in your project\'s Authentication settings and run Deploy Gateway again.'
       )
     }
     return { email: creds.email, mode: 'created' }

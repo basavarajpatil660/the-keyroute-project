@@ -1,8 +1,7 @@
 import { useState, useRef, type ReactElement } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
-import { provisionOwnerAccount } from '../../lib/owner'
-import { CodeBlock } from '../../components/CodeBlock'
+import { deployGateway, extractProjectRef } from '../../lib/deploy-gateway'
 
 interface ConnectionRow {
   id: string
@@ -18,54 +17,6 @@ function getErrorMessage(err: unknown, fallback: string): string {
   }
   return fallback
 }
-
-// Pulls the 20-char project ref out of a project URL like
-// https://<ref>.supabase.co — returns null if it doesn't look like one.
-function extractProjectRef(projectUrl: string): string | null {
-  try {
-    const hostname = new URL(projectUrl.trim()).hostname
-    const match = hostname.match(/^([a-z0-9]{20})\.supabase\.co$/)
-    return match ? match[1] : null
-  } catch {
-    return null
-  }
-}
-
-function gatewayFunctionUrl(ref: string): string {
-  return `https://${ref}.supabase.co/functions/v1/gateway`
-}
-
-// The one-time self-host provisioning steps, run by the user in a terminal.
-// Everything here talks to Supabase via its own CLI — no backend of ours is
-// involved, so this works no matter where (or whether) the dashboard itself
-// is hosted.
-const CLI_STEPS: { title: string; note: string; command: string }[] = [
-  {
-    title: 'Log in to Supabase',
-    note: 'Opens a browser window to authenticate the CLI with your Supabase account.',
-    command: 'npx supabase login',
-  },
-  {
-    title: 'Link this repo to your project',
-    note: 'One-time. Replace your-project-ref with the 20-character ref from your project URL (https://<ref>.supabase.co).',
-    command: 'npx supabase link --project-ref your-project-ref',
-  },
-  {
-    title: 'Apply the database migrations',
-    note: 'Runs every SQL file in supabase/migrations against your project, in order. Safe to re-run.',
-    command: 'npx supabase db push',
-  },
-  {
-    title: 'Deploy the gateway function',
-    note: 'Publishes supabase/functions/gateway into your project. --no-verify-jwt lets callers authenticate with platform keys instead of Supabase JWTs.',
-    command: 'npx supabase functions deploy gateway --no-verify-jwt',
-  },
-  {
-    title: 'Apply project settings',
-    note: "Pushes supabase/config.toml to your project — including email-confirmations-off, which the silent owner account needs so it can sign up without clicking a confirmation link.",
-    command: 'npx supabase config push',
-  },
-]
 
 async function fetchConnection(): Promise<ConnectionRow | null> {
   const { data, error } = await supabase
@@ -183,11 +134,11 @@ export function ConnectionsPage() {
   const [editServiceKey, setEditServiceKey] = useState('')
   const editPanelRef = useRef<HTMLDivElement>(null)
 
-  // Finish-setup state. provisionOwnerAccount() creates the silent owner
-  // auth user for this install and signs this browser in as it — the same
-  // call the old one-click deploy used to make at the end of its chain.
-  const [finishResult, setFinishResult] = useState<{ ok: boolean; text: string } | null>(null)
-  const [finishing, setFinishing] = useState(false)
+  // Deploy Gateway state. The personal access token lives ONLY in this
+  // React state for the duration of the deploy request chain.
+  const [accessToken, setAccessToken] = useState('')
+  const [deployResult, setDeployResult] = useState<{ ok: boolean; text: string; gatewayUrl?: string } | null>(null)
+  const [copiedUrl, setCopiedUrl] = useState(false)
 
   const { data: connection, isLoading, isError, error } = useQuery({
     queryKey: ['connection'],
@@ -246,21 +197,54 @@ export function ConnectionsPage() {
     },
   })
 
-  const handleFinishSetup = async () => {
-    setFinishResult(null)
-    setFinishing(true)
+  const [deployStep, setDeployStep] = useState('')
+
+  const deployMutation = useMutation({
+    mutationFn: async ({ projectUrl, token }: { projectUrl: string; token: string }) => {
+      setDeployResult(null)
+      setCopiedUrl(false)
+      try {
+        const result = await deployGateway(token, projectUrl, setDeployStep)
+        setDeployResult({
+          ok: true,
+          text: `Gateway deployed${result.ownerEmail ? ` — signed in silently as ${result.ownerEmail}` : ''}. Your project is live at:`,
+          gatewayUrl: result.gatewayUrl,
+        })
+      } finally {
+        // The token never outlives this one action — dropped from state
+        // immediately on success or failure. It was sent nowhere except
+        // api.supabase.com and is never stored or logged anywhere.
+        setAccessToken('')
+        setDeployStep('')
+      }
+    },
+    onError: (err) => {
+      setDeployResult({ ok: false, text: getErrorMessage(err, 'Deployment failed') })
+    },
+  })
+
+  const handleDeploy = () => {
+    setMessage(null)
+    const url = connection?.project_url ?? projectUrl
+    if (!extractProjectRef(url)) {
+      setDeployResult({ ok: false, text: 'Enter a valid Supabase project URL (https://<ref>.supabase.co) first.' })
+      return
+    }
+    if (!accessToken.trim()) {
+      setDeployResult({ ok: false, text: 'A personal access token is required to provision your project.' })
+      return
+    }
+    deployMutation.mutate({ projectUrl: url, token: accessToken.trim() })
+  }
+
+  const handleCopyGatewayUrl = async () => {
+    if (!deployResult?.gatewayUrl) return
     try {
-      const owner = await provisionOwnerAccount()
-      const url = connection?.project_url ?? projectUrl
-      const ref = extractProjectRef(url)
-      setFinishResult({
-        ok: true,
-        text: `Signed in silently as ${owner.email}.${ref ? ` Your gateway is live at ${gatewayFunctionUrl(ref)}` : ''}`,
-      })
-    } catch (err) {
-      setFinishResult({ ok: false, text: getErrorMessage(err, 'Could not create the owner account') })
-    } finally {
-      setFinishing(false)
+      await navigator.clipboard.writeText(deployResult.gatewayUrl)
+      setCopiedUrl(true)
+      setTimeout(() => setCopiedUrl(false), 2000)
+    } catch {
+      // Clipboard API not available
     }
   }
 
@@ -530,89 +514,122 @@ export function ConnectionsPage() {
     </div>
   )
 
-  const renderSetupGuideCard = () => {
+  const renderDeployGatewayCard = () => {
     const effectiveUrl = connection?.project_url ?? projectUrl
-    const ref = extractProjectRef(effectiveUrl)
+    const refValid = Boolean(extractProjectRef(effectiveUrl))
 
     return (
       <div className="surface-card" style={{ padding: 28, marginBottom: 20 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Set up with the Supabase CLI</h3>
+        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Deploy Gateway</h3>
         <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 16, lineHeight: 1.6 }}>
-          Run these commands once from the repo root to provision everything into your own
-          Supabase project. After that your gateway runs permanently at{' '}
-          <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>
-            https://&lt;your-ref&gt;.supabase.co/functions/v1/gateway
-          </code>{' '}
-          — no backend of ours (or anyone's) sits in between.
+          Runs this project's SQL migrations and deploys the gateway as a Supabase Edge Function
+          inside your own Supabase project. Once deployed, your gateway runs permanently at{' '}
+          <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>https://&lt;your-ref&gt;.supabase.co/functions/v1/gateway</code>{' '}
+          — no server of ours (or yours) needs to stay running.
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 640 }}>
-          {CLI_STEPS.map((step, i) => (
-            <div key={step.command}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--color-amber)' }}>
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)' }}>{step.title}</span>
-              </div>
-              <p style={{ fontSize: 12, color: 'var(--color-text-faint)', lineHeight: 1.6, margin: '0 0 8px 30px' }}>
-                {step.note}
-              </p>
-              <div style={{ margin: '0 0 0 30px' }}>
-                <CodeBlock language="bash" code={step.command} />
-              </div>
-            </div>
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 420 }}>
+          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-faint)' }}>
+            Supabase personal access token
+          </label>
+          <input
+            type="password"
+            value={accessToken}
+            onChange={e => setAccessToken(e.target.value)}
+            placeholder="sbp_…"
+            autoComplete="off"
+            style={inputStyle}
+          />
+          <p style={{ fontSize: 12, color: 'var(--color-text-faint)', lineHeight: 1.6 }}>
+            This token grants account-wide access. It is used once, right now, to provision this
+            project via the official Supabase Management API — then discarded immediately from
+            memory. It is never stored in the database, localStorage, sessionStorage, or any log.
+            Create one under Dashboard → Account → Access Tokens.
+          </p>
 
-          <div style={{ borderTop: '1px solid var(--color-border-muted)', paddingTop: 16 }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)' }}>Finish setup</span>
-            <p style={{ fontSize: 12, color: 'var(--color-text-faint)', lineHeight: 1.6, margin: '4px 0 10px' }}>
-              Once all five commands have run and this dashboard is configured with your project URL +
-              anon key (via <code>.env.local</code> or your host's environment settings), click below. It
-              provisions this install's silent owner account and signs you in — no login form, no email.
-            </p>
-            <button
-              onClick={handleFinishSetup}
-              disabled={finishing}
-              className="btn-primary"
+          {deployMutation.isPending && deployStep && (
+            <div
               style={{
-                width: '100%',
-                textAlign: 'center',
-                fontSize: 14,
-                opacity: finishing ? 0.6 : 1,
-                cursor: finishing ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '12px 14px',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--color-surface-2)',
+                border: '1px solid var(--color-border)',
+                fontSize: 13,
+                color: 'var(--color-text-muted)',
               }}
+              role="status"
             >
-              {finishing ? 'Creating owner account…' : 'Create owner account & sign in'}
-            </button>
+              <span style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid var(--color-border)', borderTopColor: 'var(--color-indigo)', animation: 'spin 1s linear infinite', flexShrink: 0 }} />
+              {deployStep}
+            </div>
+          )}
 
-            {finishResult && (
-              <div
-                style={{
-                  padding: '12px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  background: finishResult.ok ? 'rgba(63,185,80,0.1)' : 'rgba(248,81,73,0.1)',
-                  border: `1px solid ${finishResult.ok ? 'rgba(63,185,80,0.3)' : 'rgba(248,81,73,0.3)'}`,
-                  color: finishResult.ok ? 'var(--color-green)' : 'var(--color-red)',
-                  fontSize: 13,
-                  lineHeight: 1.5,
-                  marginTop: 12,
-                  wordBreak: 'break-word',
-                }}
-                role="alert"
-              >
-                {finishResult.text}
-              </div>
-            )}
+          {deployResult && (
+            <div
+              style={{
+                padding: '12px 14px',
+                borderRadius: 'var(--radius-md)',
+                background: deployResult.ok ? 'rgba(63,185,80,0.1)' : 'rgba(248,81,73,0.1)',
+                border: `1px solid ${deployResult.ok ? 'rgba(63,185,80,0.3)' : 'rgba(248,81,73,0.3)'}`,
+                color: deployResult.ok ? 'var(--color-green)' : 'var(--color-red)',
+                fontSize: 13,
+                lineHeight: 1.5,
+              }}
+              role="alert"
+            >
+              {deployResult.text}
+              {deployResult.ok && deployResult.gatewayUrl && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+                  <code
+                    style={{
+                      flex: 1,
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: 12,
+                      color: 'var(--color-text-primary)',
+                      background: 'var(--color-surface)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '8px 10px',
+                      overflowX: 'auto',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {deployResult.gatewayUrl}
+                  </code>
+                  <button
+                    onClick={handleCopyGatewayUrl}
+                    className="btn-ghost"
+                    style={{ fontSize: 12, padding: '7px 12px', flexShrink: 0 }}
+                  >
+                    {copiedUrl ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+              )}
+              {!deployResult.ok && (
+                <p style={{ fontSize: 12, marginTop: 6, opacity: 0.9 }}>
+                  The access token has been discarded — paste it again to retry.
+                </p>
+              )}
+            </div>
+          )}
 
-            {ref && (
-              <p style={{ fontSize: 12, color: 'var(--color-text-faint)', lineHeight: 1.6, marginTop: 12 }}>
-                Gateway URL for this project:{' '}
-                <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-text-muted)' }}>
-                  {gatewayFunctionUrl(ref)}
-                </code>
-              </p>
-            )}
-          </div>
+          <button
+            onClick={handleDeploy}
+            disabled={deployMutation.isPending || !refValid}
+            className="btn-primary"
+            title={refValid ? undefined : 'Enter a valid Supabase project URL first'}
+            style={{
+              width: '100%',
+              textAlign: 'center',
+              fontSize: 14,
+              opacity: deployMutation.isPending || !refValid ? 0.6 : 1,
+              cursor: deployMutation.isPending || !refValid ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {deployMutation.isPending ? 'Deploying…' : 'Deploy Gateway'}
+          </button>
         </div>
       </div>
     )
@@ -648,8 +665,8 @@ export function ConnectionsPage() {
       {isError ? (
         <>
           {/* Expected on a brand-new project (migrations not applied yet) —
-              shown as a soft note so it never blocks the CLI setup guide,
-              whose `db push` step is what applies those migrations. */}
+              shown as a soft note so it never blocks Deploy Gateway, which is
+              what applies those migrations in the first place. */}
           <div
             style={{
               padding: '12px 14px',
@@ -677,20 +694,20 @@ export function ConnectionsPage() {
             </button>
           </div>
           {renderConnectForm()}
-          {renderSetupGuideCard()}
+          {renderDeployGatewayCard()}
           {renderComingSoonProviders()}
           {renderInfoPanel()}
         </>
       ) : !isLoading && connection ? (
         <>
           {renderConnectionCard()}
-          {renderSetupGuideCard()}
+          {renderDeployGatewayCard()}
           {renderInfoPanel()}
         </>
       ) : !isLoading && !connection ? (
         <>
           {renderConnectForm()}
-          {renderSetupGuideCard()}
+          {renderDeployGatewayCard()}
           {renderComingSoonProviders()}
           {renderInfoPanel()}
         </>

@@ -23,11 +23,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!data.session && mounted && hasOwnerCredentials()) {
         // No active session, but this browser has owner credentials on file
-        // (the "Create owner account & sign in" setup step ran here before).
-        // Restore the owner's session silently — no login UI, no redirect,
-        // just resolve and continue. On failure (stale credentials) they are
-        // cleared inside restoreOwnerSession so guards can route to /setup
-        // instead.
+        // (Deploy Gateway ran here before). Restore the owner's session
+        // silently — no login UI, no redirect, just resolve and continue.
+        // On failure (stale credentials) they are cleared inside
+        // restoreOwnerSession so guards can route to /setup instead.
         await restoreOwnerSession()
       }
 

@@ -205,18 +205,14 @@ VITE_SUPABASE_ANON_KEY="your-anon-key"
   {
     label: 'Run locally',
     language: 'bash',
-    code: `# Provisions the gateway into YOUR Supabase project — full walkthrough
-# (with copy buttons) on the dashboard's Connections page.
-npx supabase login
-npx supabase link --project-ref your-project-ref
-npx supabase db push                                # SQL migrations
-npx supabase functions deploy gateway --no-verify-jwt  # the gateway itself
-npx supabase config push                            # config.toml settings
+    code: `# Applies the SQL migrations + deploys the gateway edge function into
+# YOUR Supabase project — or just click "Deploy Gateway" on the
+# Connections page, which does both via the Supabase Management API.
+npx supabase db push
 
 # Starts the local dashboard (control panel only)
 npm run dev
-# → dashboard on http://localhost:5173 — click "Create owner account &
-#   sign in" on the Connections page once provisioning has finished
+# → dashboard on http://localhost:5173
 # → your gateway lives permanently at
 #   https://<your-project-ref>.supabase.co/functions/v1/gateway
 #   (independent of the dashboard being open)`,
@@ -544,7 +540,7 @@ export function DocsPage() {
             </p>
 
             <p style={{ fontSize: 14, color: 'var(--color-text-faint)', lineHeight: 1.7, marginTop: 16 }}>
-              Deploying your own instance publicly (rather than running it on localhost) works the same way — fork the repo, host the dashboard on any static host or serverless platform that can build a Vite app (Netlify, Cloudflare Pages, Vercel, …), and set the same environment variables there instead of in <code>.env.local</code>. The gateway itself never needs a host of its own — it lives inside Supabase.
+              Deploying your own instance publicly (rather than running it on localhost) works the same way — fork the repo, connect it to your own Vercel project, and set the same environment variables there instead of in <code>.env.local</code>.
             </p>
           </section>
 

@@ -46,9 +46,8 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
   if (!session) {
     // No visible login UI in the self-hosted app: if this browser has owner
-    // credentials we're mid-restore (brief), otherwise setup has never
-    // completed here → send to the Connections page's unguarded route via
-    // /setup instead of a login page.
+    // credentials we're mid-restore (brief), otherwise Deploy Gateway has
+    // never run here → send to setup instead of a login page.
     if (!hasOwnerCredentials()) {
       return <Navigate to="/setup" replace />
     }
@@ -75,12 +74,11 @@ export function DashboardPage() {
     <Suspense fallback={<DashboardSectionLoader />}>
       <Routes>
         {/*
-         * Connections is deliberately NOT wrapped in RequireAuth: its setup
-         * guide is what CREATES the silent owner account (via the "Create
-         * owner account & sign in" button), so guarding it behind an existing
-         * session deadlocks fresh installs (no session → bounced to /setup →
-         * can never reach the button that makes one). DashboardLayout handles
-         * the no-session state itself.
+         * Connections is deliberately NOT wrapped in RequireAuth: its Deploy
+         * Gateway card is what CREATES the silent owner account, so guarding
+         * it behind an existing session deadlocks fresh installs (no session
+         * → bounced to /setup → can never reach the button that makes one).
+         * DashboardLayout handles the no-session state itself.
          */}
         <Route element={<DashboardLayout />}>
           <Route path="connections" element={<ConnectionsPage />} />
