@@ -7,25 +7,6 @@ import { BentoGrid } from '../components/BentoGrid'
 import { WhyKeyrouteSection, GetInvolvedSection } from '../components/WhyKeyrouteSection'
 import { SectionDivider } from '../components/SectionDivider'
 
-const TRUST_BADGES = [
-  {
-    label: 'Free forever',
-    caption: 'No trial. No card required.',
-  },
-  {
-    label: 'AES-256',
-    caption: 'Keys encrypted before they leave your browser.',
-  },
-  {
-    label: 'Your own Supabase',
-    caption: 'Ciphertext lives in your project. Not ours.',
-  },
-  {
-    label: '5+ providers',
-    caption: 'OpenAI, Gemini, Groq, Anthropic, custom.',
-  },
-]
-
 /**
  * HeroColumnDivider — vertical version of SectionDivider, run down the
  * seam between the hero's two columns (headline copy / routing demo).
@@ -174,79 +155,6 @@ export function HomePage() {
               <HeroRouteDemo />
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ── Trust Strip ────────────────────────────────────────────────────── */}
-      <section
-        style={{
-          padding: '56px 0 64px',
-          position: 'relative',
-          zIndex: 1,
-          backgroundColor: 'var(--color-base)',
-          borderBottom: '1px solid var(--color-border-muted)',
-        }}
-      >
-        <div className="container">
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: 32,
-              alignItems: 'start',
-            }}
-            className="trust-strip"
-          >
-            {TRUST_BADGES.map((badge, i) => (
-              <div
-                key={i}
-                style={{
-                  textAlign: 'center',
-                  padding: '0 16px',
-                  borderRight: i < 3 ? '1px solid var(--color-border-muted)' : 'none',
-                }}
-              >
-                <p
-                  style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: 'clamp(20px, 3vw, 28px)',
-                    fontWeight: 700,
-                    lineHeight: 1.15,
-                    color: 'var(--color-text-primary)',
-                    marginBottom: 8,
-                    letterSpacing: '-0.02em',
-                  }}
-                >
-                  {badge.label}
-                </p>
-                <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
-                  {badge.caption}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <style>{`
-            @media (max-width: 900px) {
-              .trust-strip {
-                grid-template-columns: repeat(2, 1fr) !important;
-              }
-              .trust-strip > div {
-                border-right: none !important;
-                border-bottom: 1px solid var(--color-border-muted);
-                padding-bottom: 24px;
-              }
-              .trust-strip > div:nth-child(3),
-              .trust-strip > div:nth-child(4) {
-                border-bottom: none !important;
-              }
-            }
-            @media (max-width: 520px) {
-              .trust-strip {
-                grid-template-columns: 1fr !important;
-              }
-            }
-          `}</style>
         </div>
       </section>
 

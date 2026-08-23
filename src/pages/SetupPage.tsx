@@ -30,27 +30,6 @@ const ENV_VARS = [
   },
 ]
 
-const NEXT_STEPS = [
-  {
-    title: 'Deploy the gateway',
-    description: 'On the Connections page, click "Deploy Gateway" with a Supabase personal access token. It applies the migrations and provisions the always-on edge function inside your project — after that, this dashboard never needs to be open again.',
-    to: '/dashboard/connections',
-    label: 'Dashboard → Connections',
-  },
-  {
-    title: 'Add your first provider key',
-    description: 'Add an OpenAI, Groq, Gemini, or custom OpenAI-compatible key with a short label. That label becomes the routing prefix, e.g. openai-work/gpt-4o.',
-    to: '/dashboard/keys',
-    label: 'Dashboard → Provider Keys',
-  },
-  {
-    title: 'Generate a platform key',
-    description: 'Create the API key your applications use to call this gateway. Shown once — store it somewhere safe.',
-    to: '/dashboard/settings',
-    label: 'Dashboard → Settings → Platform Keys',
-  },
-]
-
 // ─── Building blocks (styled after DocsPage / HowItWorks) ───────────────────
 
 function StepHeader({ number, title }: { number: string; title: string }) {
@@ -104,11 +83,11 @@ export function SetupPage() {
           Set up Keyroute on your own infrastructure
         </h1>
         <p style={{ fontSize: 16, color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 48 }}>
-          From a fresh clone to a working gateway in about ten minutes. Everything runs against
-          your own Supabase project — your keys, your data, no one else's servers.
+          From a fresh clone to a working gateway in about ten minutes — no CLI commands needed.
+          Everything runs against your own Supabase project — your keys, your data, no one else's servers.
         </p>
 
-        {/* Step 1 — Prerequisites */}
+        {/* Step 01 — Prerequisites */}
         <section id="prerequisites" style={{ marginBottom: 56 }}>
           <StepHeader number="01" title="Prerequisites" />
           <div className="surface-card" style={{ overflow: 'hidden' }}>
@@ -130,7 +109,7 @@ export function SetupPage() {
           </div>
         </section>
 
-        {/* Step 2 — Clone & install */}
+        {/* Step 02 — Clone & install */}
         <section id="clone" style={{ marginBottom: 56 }}>
           <StepHeader number="02" title="Clone the repo & install dependencies" />
           <CodeBlock
@@ -145,17 +124,18 @@ npm install`}
           </Callout>
         </section>
 
-        {/* Step 3 — Create a Supabase project */}
+        {/* Step 03 — Create a Supabase project */}
         <section id="supabase" style={{ marginBottom: 56 }}>
           <StepHeader number="03" title="Create a Supabase project" />
           <div style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, display: 'flex', flexDirection: 'column', gap: 12 }}>
             <p>
               Go to <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer">supabase.com/dashboard</a>{' '}
               and create a new project. Pick any name and region close to you — the free tier is fine.
+              Wait until provisioning finishes (the green "Active" badge) before continuing.
             </p>
             <p>
               Once it finishes provisioning, open <strong style={{ color: 'var(--color-text-primary)' }}>Project Settings → API</strong>.
-              You need three values from that page:
+              You need these values from that page:
             </p>
           </div>
           <div className="surface-card" style={{ marginTop: 20, overflow: 'hidden' }}>
@@ -181,7 +161,7 @@ npm install`}
           </div>
         </section>
 
-        {/* Step 4 — Environment variables */}
+        {/* Step 04 — Environment variables */}
         <section id="env" style={{ marginBottom: 56 }}>
           <StepHeader number="04" title="Configure .env.local" />
           <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 20 }}>
@@ -229,87 +209,218 @@ npm install`}
           </Callout>
         </section>
 
-        {/* Step 5 — Migrations */}
-        <section id="migrations" style={{ marginBottom: 56 }}>
-          <StepHeader number="05" title="Run the SQL migrations" />
+        {/* Step 05 — Start the dev server */}
+        <section id="run" style={{ marginBottom: 56 }}>
+          <StepHeader number="05" title="Start the dev server" />
+          <CodeBlock language="bash" code={`npm run dev`} />
+          <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginTop: 20 }}>
+            Open <code>http://localhost:5173</code> — the landing page should render. Leave this
+            terminal running; the dev server is your dashboard's control panel for the next step.
+          </p>
+          <Callout accent="amber">
+            <strong style={{ color: 'var(--color-amber)' }}>Important — where to navigate:</strong>{' '}
+            Do not open <code>/dashboard</code> or <code>/dashboard/overview</code> yet — they require an
+            existing session and won't show anything useful until you've completed the next step. Go
+            directly to <code>/dashboard/connections</code> instead.
+          </Callout>
+          <Callout accent="indigo">
+            Why: on a fresh install there is no signed-in owner yet, so those URLs immediately bounce
+            you to this setup page. The Connections page is deliberately reachable without a session —
+            it's where Deploy Gateway lives, and Deploy Gateway is what creates the session.
+          </Callout>
+        </section>
+
+        {/* Step 06 — Deploy Gateway */}
+        <section id="deploy-gateway" style={{ marginBottom: 56 }}>
+          <StepHeader number="06" title="Deploy Gateway (one click)" />
+          <div style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <p>
+              This single step provisions everything into your Supabase project — database schema,
+              owner account, and the always-on gateway edge function. No terminal commands involved.
+            </p>
+            <ol style={{ margin: 0, paddingLeft: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <li>
+                Open{' '}
+                <Link to="/dashboard/connections" style={{ color: 'var(--color-indigo)' }}>
+                  http://localhost:5173/dashboard/connections
+                </Link>{' '}
+                and scroll to the <strong style={{ color: 'var(--color-text-primary)' }}>Deploy Gateway</strong> card.
+              </li>
+              <li>
+                Create a Supabase personal access token:{' '}
+                open{' '}
+                <a href="https://supabase.com/dashboard/account/tokens" target="_blank" rel="noreferrer">
+                  supabase.com/dashboard/account/tokens
+                </a>
+                , click <em>Generate new token</em>, give it any name, and copy the value (it starts with{' '}
+                <code>sbp_</code>). This token can provision anything in your Supabase account, so treat
+                it like a password.
+              </li>
+              <li>
+                Paste the token into the <strong style={{ color: 'var(--color-text-primary)' }}>Supabase personal access token</strong>{' '}
+                field. It is used once for this action and then discarded from memory immediately — it is
+                never stored in the database, localStorage, sessionStorage, or any log, and it is sent
+                nowhere except Supabase's own Management API.
+              </li>
+              <li>
+                Make sure the project URL shown or entered on the page is your new project's URL (the
+                same one you put in <code>.env.local</code>), then click{' '}
+                <strong style={{ color: 'var(--color-text-primary)' }}>Deploy Gateway</strong>.
+              </li>
+            </ol>
+            <p>
+              Over the next ~30–60 seconds the button shows live progress while it: applies every SQL
+              migration in <code>supabase/migrations</code> in order → enables email auto-confirm →
+              silently creates this install's owner account and signs your browser in (no email, no
+              login form) → deploys the gateway edge function → waits until the public endpoint answers.
+            </p>
+            <p>
+              Success looks like a green confirmation box containing your live gateway URL —{' '}
+              <code>https://&lt;your-project-ref&gt;.supabase.co/functions/v1/gateway</code> — with a{' '}
+              <strong style={{ color: 'var(--color-text-primary)' }}>Copy</strong> button. From this point on
+              the gateway runs permanently inside your own Supabase project; this dev server never needs
+              to be open again for the gateway to work.
+            </p>
+          </div>
+          <Callout accent="amber">
+            <strong style={{ color: 'var(--color-amber)' }}>Deploy Gateway runs once per fresh project.</strong>{' '}
+            The migrations are not idempotent — re-running them against a partially-provisioned project
+            fails with "already exists" errors. If the deploy fails partway through, either reset the
+            Supabase project (drop the tables and functions it created) or create a brand-new Supabase
+            project and start this guide over from step 03 before clicking Deploy Gateway again.
+          </Callout>
+        </section>
+
+        {/* Step 07 — Dashboard unlocked */}
+        <section id="dashboard-unlocked" style={{ marginBottom: 56 }}>
+          <StepHeader number="07" title="Now the whole dashboard works" />
+          <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 16 }}>
+            Because Deploy Gateway created a real session for this browser, every dashboard route is now
+            reachable — including the ones that bounced you earlier:
+          </p>
+          <div className="surface-card" style={{ overflow: 'hidden' }}>
+            {[
+              { path: '/dashboard/overview', what: 'Usage stats, request volume, and activity at a glance.' },
+              { path: '/dashboard/keys', what: 'Add provider keys (step 08).' },
+              { path: '/dashboard/usage', what: 'Per-request usage log with tokens and latency.' },
+              { path: '/dashboard/settings', what: 'Platform keys, profile, danger zone (step 09).' },
+              { path: '/dashboard/activity', what: 'Recent request activity feed.' },
+            ].map((row, i, arr) => (
+              <div
+                key={row.path}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '240px 1fr',
+                  gap: 16,
+                  padding: '13px 20px',
+                  borderBottom: i < arr.length - 1 ? '1px solid var(--color-border-muted)' : 'none',
+                }}
+              >
+                <Link to={row.path} style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--color-indigo)', textDecoration: 'none' }}>
+                  {row.path}
+                </Link>
+                <span style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.5 }}>{row.what}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Step 08 — Provider key */}
+        <section id="provider-key" style={{ marginBottom: 56 }}>
+          <StepHeader number="08" title="Add your first provider key" />
+          <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
+            On the <Link to="/dashboard/keys" style={{ color: 'var(--color-indigo)' }}>Keys page</Link>, add an
+            OpenAI, Groq, Gemini, or custom OpenAI-compatible API key with a short label. That label becomes
+            the routing prefix your requests use — e.g. a key labeled <code>openai-work</code> is addressed
+            as <code>openai-work/gpt-4o</code>. Keys are AES-encrypted via Vault inside your own Supabase
+            project before storage; the plaintext is never readable by the application layer after upload.
+          </p>
+        </section>
+
+        {/* Step 09 — Platform key */}
+        <section id="platform-key" style={{ marginBottom: 56 }}>
+          <StepHeader number="09" title="Generate a platform key" />
+          <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
+            On the <Link to="/dashboard/settings" style={{ color: 'var(--color-indigo)' }}>Settings page</Link>,
+            generate a platform key under <strong style={{ color: 'var(--color-text-primary)' }}>Platform Keys</strong>.
+            This is the API key your applications authenticate with (<code>pk_live_…</code>) — the gateway
+            validates it against the database on every request. It is shown exactly once at creation;
+            store it somewhere safe before leaving the page.
+          </p>
+        </section>
+
+        {/* Step 10 — Test it */}
+        <section id="test-it" style={{ marginBottom: 56 }}>
+          <StepHeader number="10" title="Test it with a real request" />
           <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 20 }}>
-            The database schema lives as plain SQL in <code>supabase/migrations</code>. Apply it to
-            your new project with the Supabase CLI:
+            Send a chat completion through your gateway using the platform key from step 09 and the
+            label-prefixed model from step 08. The response shape is identical to OpenAI's chat completions API:
           </p>
           <CodeBlock
             language="bash"
-            code={`# Option A — link your project once, then push
-npx supabase login
-npx supabase link --project-ref your-project-ref
-npx supabase db push
-
-# Option B — push directly against the connection string
-# (Settings → Database → Connection string)
-npx supabase db push --db-url "postgresql://postgres:YOUR-PASSWORD@db.your-project-ref.supabase.co:5432/postgres"`}
+            code={`curl https://<your-project-ref>.supabase.co/functions/v1/gateway \\
+  -H "Authorization: Bearer pk_live_YOUR_PLATFORM_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "openai-work/gpt-4o-mini",
+    "messages": [{ "role": "user", "content": "Hello!" }]
+  }'`}
           />
           <Callout>
-            These migrations create the tables, RLS policies, encryption helpers, and RPC functions
-            (key validation, provider-key resolution, usage logging) that the app and the gateway
-            edge function rely on. Prefer not to touch a terminal? The{' '}
-            <strong style={{ color: 'var(--color-text-primary)' }}>Deploy Gateway</strong> button on
-            the Connections page applies these same migrations for you via the Supabase Management API.
+            Swap in your own project ref, platform key, and label/model pair. Point any OpenAI-compatible SDK
+            at the same URL as its <code>base_url</code> and it just works — streaming included.
           </Callout>
         </section>
 
-        {/* Step 6 — Run it */}
-        <section id="run" style={{ marginBottom: 56 }}>
-          <StepHeader number="06" title="Start the dev server" />
-          <CodeBlock language="bash" code={`npm run dev`} />
-          <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginTop: 20, marginBottom: 0 }}>
-            Open <code>http://localhost:5173</code> — the landing page should render. There's no
-            login form: Deploy Gateway provisions a silent owner account for this install, so
-            opening the <Link to="/dashboard">dashboard</Link> just works (or routes you to{' '}
-            <Link to="/setup">setup</Link> if it hasn't been deployed yet).
+        {/* Step 11 — Optional: prefer the CLI? */}
+        <section id="cli-alternative" style={{ marginBottom: 56 }}>
+          <StepHeader number="11" title="Optional: prefer the CLI?" />
+          <p style={{ fontSize: 15, color: 'var(--color-text-muted)', lineHeight: 1.7, marginBottom: 16 }}>
+            You don't need this. Deploy Gateway already applies every migration, provisions the owner
+            account, and deploys the edge function automatically. But if you'd rather run migrations
+            yourself with the Supabase CLI, here is the equivalent of what the button does:
           </p>
-          <Callout accent="indigo">
-            The dashboard is a control panel only. Once you've clicked{' '}
-            <strong style={{ color: 'var(--color-text-primary)' }}>Deploy Gateway</strong> (Connections
-            page), your gateway runs permanently inside your own Supabase project at{' '}
-            <code>https://&lt;your-project-ref&gt;.supabase.co/functions/v1/gateway</code> — completely
-            independent of this dev server or any other server staying open.
-          </Callout>
+          <details
+            style={{
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--color-surface-2)',
+              padding: '14px 18px',
+            }}
+          >
+            <summary style={{ cursor: 'pointer', fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)' }}>
+              Show the manual Supabase CLI commands
+            </summary>
+            <div style={{ marginTop: 16 }}>
+              <CodeBlock
+                language="bash"
+                code={`npx supabase login
+npx supabase link --project-ref your-project-ref
+npx supabase db push`}
+              />
+              <Callout accent="indigo">
+                Note: even with the CLI you still need the Connections page once — its Deploy Gateway card
+                also flips email auto-confirm on and creates the silent owner account that unlocks the rest
+                of the dashboard. And migrations are not idempotent: don't mix CLI pushes with Deploy
+                Gateway retries against the same project (see step 06).
+              </Callout>
+            </div>
+          </details>
         </section>
 
-        {/* Step 7 — What next */}
-        <section id="next-steps" style={{ marginBottom: 56 }}>
-          <StepHeader number="07" title="What to do next" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {NEXT_STEPS.map(step => (
-              <Link
-                key={step.title}
-                to={step.to}
-                className="surface-card"
-                style={{
-                  display: 'block',
-                  padding: '18px 22px',
-                  textDecoration: 'none',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text-primary)' }}>{step.title}</h3>
-                  <span style={{ color: 'var(--color-amber)', fontSize: 14, flexShrink: 0 }}>→</span>
-                </div>
-                <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.6, marginTop: 6, marginBottom: 8 }}>
-                  {step.description}
-                </p>
-                <code style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--color-amber)' }}>{step.label}</code>
-              </Link>
-            ))}
-          </div>
+        {/* Step 12 — Optional: host remotely */}
+        <section id="hosting" style={{ marginBottom: 56 }}>
+          <StepHeader number="12" title="Optional: host the dashboard remotely instead of localhost" />
           <Callout accent="indigo">
-            Want the dashboard reachable at a real URL instead of <code>localhost</code>? You can
-            optionally deploy this repo's control-panel UI to any platform that can build and host a
-            Vite app (it ships with a <code>vercel.json</code> for Vercel) and set the{' '}
-            <code>VITE_</code> variables from step 04 there instead of in <code>.env.local</code>.
-            This hosts the dashboard only — the gateway itself is already permanently live inside your
-            Supabase project at{' '}
-            <code>https://&lt;your-project-ref&gt;.supabase.co/functions/v1/gateway</code>, no matter
-            where — or whether — the dashboard is deployed.
+            Want the dashboard reachable at a real URL instead of <code>localhost</code>? You can optionally
+            deploy this repo's control-panel UI to any static host that can build a Vite app (Vercel is one
+            option, not a requirement — Netlify, Cloudflare Pages, and others work the same way) and set
+            the <code>VITE_</code> variables from step 04 there instead of in <code>.env.local</code>. Both
+            modes are first-class: locally, the dev server serves the /api proxy endpoints itself; hosted,
+            the same endpoints run as serverless functions. This hosts the dashboard only — the gateway
+            itself is already permanently live inside your Supabase project at{' '}
+            <code>https://&lt;your-project-ref&gt;.supabase.co/functions/v1/gateway</code>, no matter where —
+            or whether — the dashboard is deployed.
           </Callout>
         </section>
 

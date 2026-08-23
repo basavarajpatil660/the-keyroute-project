@@ -206,8 +206,13 @@ VITE_SUPABASE_ANON_KEY="your-anon-key"
     label: 'Run locally',
     language: 'bash',
     code: `# Applies the SQL migrations + deploys the gateway edge function into
-# YOUR Supabase project — or just click "Deploy Gateway" on the
-# Connections page, which does both via the Supabase Management API.
+# YOUR Supabase project.
+#
+# SIMPLER DEFAULT: skip the command below entirely — click "Deploy Gateway"
+# on the dashboard's Connections page and it runs everything automatically
+# (migrations, owner account, edge function) via the Supabase Management API.
+#
+# Alternative (manual CLI, not required):
 npx supabase db push
 
 # Starts the local dashboard (control panel only)
@@ -540,7 +545,7 @@ export function DocsPage() {
             </p>
 
             <p style={{ fontSize: 14, color: 'var(--color-text-faint)', lineHeight: 1.7, marginTop: 16 }}>
-              Deploying your own instance publicly (rather than running it on localhost) works the same way — fork the repo, connect it to your own Vercel project, and set the same environment variables there instead of in <code>.env.local</code>.
+              Deploying your own instance publicly (rather than running it on localhost) works the same way — fork the repo, connect it to any static host that can build a Vite app (Vercel is one option), and set the same environment variables there instead of in <code>.env.local</code>.
             </p>
           </section>
 
